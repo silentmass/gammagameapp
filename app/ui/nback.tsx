@@ -28,21 +28,20 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
     const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-    const [targetStimulus, setTargetStimulus] = useState<StimulusFetched | null>(null);
     const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
     const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
     const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
     const [nback, setNback] = useState(2);
+    const [showTarget, setShowTarget] = useState(true);
     const Ref = useRef<number | null>(null);
 
     function getRandomStimulus(start: number, stop: number) {
         const minInt = Math.ceil(start);
         const maxInt = Math.floor(stop);
         const randomStimulusIdx = Math.floor(Math.random() * (maxInt - minInt + 1) + minInt);
-        console.log(newStimuli[randomStimulusIdx])
         const newStimulus = newStimuli[randomStimulusIdx];
-        setTargetStimulus(newStimulus);
         setStimulusHistory(prevHistory => [...prevHistory, { ...newStimulus, visible: true }]);
+        console.log(stimulusHistory[stimulusHistory.length - 1]);
 
         setTargetStimulusMatches("");
     }
@@ -50,13 +49,12 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     function hideStimulus(): void {
         console.log("setTimeout");
-        if (targetStimulus) {
-            setTargetStimulus({ ...targetStimulus, visible: false });
-        }
+        setShowTarget(false);
     }
 
     function showStimulus(start: number, stop: number): void {
         getRandomStimulus(start, stop);
+        setShowTarget(true);
         console.log("showStimulus")
         let timer = setTimeout(() => hideStimulus(), 2000);
     }
@@ -101,7 +99,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
     }
 
     function targetMatchNBack(nback: number) {
-        return targetStimulus && stimulusHistory.length > nback && targetStimulus.id === stimulusHistory[stimulusHistory.length - 1 - nback].id;
+        return stimulusHistory[stimulusHistory.length - 1] && stimulusHistory.length > nback && stimulusHistory[stimulusHistory.length - 1].id === stimulusHistory[stimulusHistory.length - 1 - nback].id;
     }
 
     function logTargetMatchNBack(nback: number) {
@@ -141,9 +139,9 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                     {children}
                     <div className='absolute top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border-0 rounded border-sky-500'>
                         <p
-                            className={`text-4xl ${targetStimulus && "visible" in targetStimulus && targetStimulus.visible ? "" : "hidden"}`}
+                            className={`text-4xl ${stimulusHistory[stimulusHistory.length - 1] && "visible" in stimulusHistory[stimulusHistory.length - 1] && showTarget ? "" : "hidden"}`}
                         >
-                            {targetStimulus?.label ?? ''}
+                            {stimulusHistory[stimulusHistory.length - 1] && 'label' in stimulusHistory[stimulusHistory.length - 1] ? stimulusHistory[stimulusHistory.length - 1].label : ''}
                         </p>
                     </div>
                 </div>
@@ -151,7 +149,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
             <div className="z-10 max-w-2xl justify-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
                 <button
                     className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
-                    onClick={() => logTargetMatchNBack(Number(nback))}>
+                    onClick={() => logTargetMatchNBack(nback)}>
                     Select
                 </button>
                 <button
