@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import StimulusLabel from '@/app/ui/stimuluslabel';
 
-export default function Nback() {
+export default function Nback({ children }: { children: React.ReactNode }) {
 
     const stimuli = [
         { label: "🍎" },
@@ -32,6 +32,7 @@ export default function Nback() {
     const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
     const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
     const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
+    const [nback, setNback] = useState(2);
     const Ref = useRef<number | null>(null);
 
     function getRandomStimulus(start: number, stop: number) {
@@ -85,6 +86,7 @@ export default function Nback() {
         }
     }
 
+
     function handleClick(selectedStimulus: StimulusFetched) {
         console.log(!selectedStimulus.selected);
         setNewStimuli(prevStimuli => {
@@ -115,35 +117,52 @@ export default function Nback() {
 
     return (
         <>
-            <div className="z-10 max-w-2xl w-full items-center justify-center font-mono text-4xl lg:flex border border-slate-500 p-0 rounded">
+            <div className="z-10 max-w-2xl w-full items-center justify-center font-mono text-4xl lg:flex border border-slate-500 p-5 rounded">
                 {
                     newStimuli.map((stimulus) => (
-                        <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={() => { }} />
+                        <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
                     ))
                 }
             </div>
-            <div className="grid grid-cols-10 gap-1 content-normal text-xs border border-slate-500 p-5 rounded">
+            <div className="grid grid-cols-10 gap-1 max-w-2xl w-full h-24 content-normal text-xs border border-slate-500 p-5 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
                     ))
                 }
             </div>
-            <div>
-                <p
-                    className={`text-4xl ${targetStimulus && "visible" in targetStimulus && targetStimulus.visible ? "" : "hidden"}`}
-                >
-                    {targetStimulus?.label ?? ''}
-                </p>
-                <p className={`text-4xl`}>
-                    {targetStimulusMatches}
-                </p>
+            <div className='flex max-w-2xl w-full flex-col items-center p-24 border border-slate-500 rounded'>
+                <div className="flex h-16 border-0 items-center justify-center">
+                    <p className={`text-4xl border-0`}>
+                        {targetStimulusMatches}
+                    </p>
+                </div>
+                <div className='flex relative w-full h-full justify-center items-center'>
+                    {children}
+                    <div className='absolute top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border-0 rounded border-sky-500'>
+                        <p
+                            className={`text-4xl ${targetStimulus && "visible" in targetStimulus && targetStimulus.visible ? "" : "hidden"}`}
+                        >
+                            {targetStimulus?.label ?? ''}
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div className="z-10 max-w-2xl w-full justify-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
+            <div className="z-10 max-w-2xl w-full justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
+                {[1, 2, 3, 4].map(nbackValue => (
+                    <button
+                        key={nbackValue}
+                        className={`border border-slate-500 p-3 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'}`}
+                        onClick={() => setNback(nbackValue)}>
+                        {nbackValue}-Back
+                    </button>
+                ))}
+            </div>
+            <div className="z-10 max-w-2xl w-full justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
                 <p>{stimulusMatchesCount}|({stimulusHistory.length})</p>
                 <button
                     className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
-                    onClick={() => logTargetMatchNBack(2)}>
+                    onClick={() => logTargetMatchNBack(Number(nback))}>
                     Select
                 </button>
                 <button
