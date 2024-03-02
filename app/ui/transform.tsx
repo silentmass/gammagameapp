@@ -13,6 +13,8 @@ export default function Transform() {
         const flickerInterval = 1 / (flickerFrequency / 60);
         let transformIncrement = 1;
         let currentTransformIncrement = 0;
+        const whiteRectWidth = 50;
+        const blackRectWidth = 20;
 
         if (canvas) {
             const centerX = canvas.width / 2;
@@ -38,10 +40,17 @@ export default function Transform() {
                     ctx.fillStyle = 'white';
 
                     ctx.fillRect(
-                        centerX - 50 - currentTransformIncrement,
-                        centerY - 50 - currentTransformIncrement,
-                        100 + 2 * currentTransformIncrement,
-                        100 + 2 * currentTransformIncrement
+                        centerX - whiteRectWidth - currentTransformIncrement,
+                        centerY - whiteRectWidth - currentTransformIncrement,
+                        2 * whiteRectWidth + 2 * currentTransformIncrement,
+                        2 * whiteRectWidth + 2 * currentTransformIncrement
+                    );
+
+                    ctx.clearRect(
+                        centerX - blackRectWidth - currentTransformIncrement,
+                        centerY - blackRectWidth - currentTransformIncrement,
+                        2 * blackRectWidth + 2 * currentTransformIncrement,
+                        2 * blackRectWidth + 2 * currentTransformIncrement
                     );
 
 
