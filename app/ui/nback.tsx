@@ -117,14 +117,14 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <div className="z-10 max-w-2xl w-full items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
+            <div className="z-10 max-w-2xl items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
                 {
                     newStimuli.map((stimulus) => (
                         <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
                     ))
                 }
             </div>
-            <div className="grid grid-cols-10 gap-1 max-w-2xl w-full content-normal text-xs border border-slate-500 p-0 rounded">
+            <div className="z-10 grid grid-cols-10 gap-1 max-w-2xl content-normal font-mono text-xs border border-slate-500 p-0 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
@@ -148,18 +148,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                     </div>
                 </div>
             </div>
-            <div className="z-10 max-w-xl w-full justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
-                {[1, 2, 3, 4].map(nbackValue => (
-                    <button
-                        key={nbackValue}
-                        className={`border border-slate-500 p-3 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'}`}
-                        onClick={() => setNback(nbackValue)}>
-                        {nbackValue}-Back
-                    </button>
-                ))}
-            </div>
-            <div className="z-10 max-w-2xl w-full justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
-                <p>{stimulusMatchesCount}|({stimulusHistory.length})</p>
+            <div className="z-10 max-w-2xl justify-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
                 <button
                     className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
                     onClick={() => logTargetMatchNBack(Number(nback))}>
@@ -170,6 +159,17 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                     onClick={() => startStopStimulusTimer()}>
                     {stimulusTimerOn ? "Stop" : "Start"}
                 </button>
+                <p>{stimulusMatchesCount}|({stimulusHistory.length})</p>
+            </div>
+            <div className="z-10 max-w-2xl justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
+                {[1, 2, 3, 4].map(nbackValue => (
+                    <button
+                        key={nbackValue}
+                        className={`text-xs border border-slate-500 p-1 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'}`}
+                        onClick={() => setNback(nbackValue)}>
+                        {nbackValue}-Back
+                    </button>
+                ))}
             </div>
         </>
 
