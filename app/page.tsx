@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import StimulusLabel from '@/app/ui/StimulusLabel';
+import StimulusLabel from '@/app/ui/stimuluslabel';
 
 const stimuli = [
   { label: "🍎" },
