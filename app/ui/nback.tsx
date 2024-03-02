@@ -115,21 +115,21 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <div className="z-10 max-w-2xl min-h-12 h-full items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
+            <div className="z-10 max-w-2xl min-h-12 items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded flex-wrap">
                 {
                     newStimuli.map((stimulus) => (
                         <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
                     ))
                 }
             </div>
-            <div className="z-10 grid grid-cols-10 place-items-center gap-0 max-w-2xl min-h-12 h-full content-normal font-mono text-xs border border-slate-500 p-0 rounded">
+            <div className="z-10 min-h-12 grid grid-cols-10 place-items-center gap-0 max-w-2xl content-normal font-mono text-xs border border-slate-500 p-0 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
                     ))
                 }
             </div>
-            <div className='flex max-w-2xl w-full flex-col items-center p-0 border border-slate-500 rounded'>
+            <div className='flex max-w-2xl w-full flex-col items-center p-0 border border-slate-500 rounded flex-wrap'>
                 <div className="flex border-0 items-center justify-center">
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
