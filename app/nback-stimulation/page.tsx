@@ -29,7 +29,7 @@ export default function Page() {
 
 
     const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
-    const [stimulusHistory, setStimulusHistory] = useState([]);
+    const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched>([]);
     const [targetStimulus, setTargetStimulus] = useState({});
     const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
     const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
