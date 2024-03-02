@@ -11,7 +11,7 @@ export default function Transform() {
         let expand = true;
         const flickerFrequency = 40;
         const flickerInterval = 1 / (flickerFrequency / 60);
-        let transformIncrement = 10;
+        let transformIncrement = 1;
         let currentTransformIncrement = 0;
 
         if (canvas) {
