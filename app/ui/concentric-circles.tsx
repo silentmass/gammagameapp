@@ -19,11 +19,6 @@ export default function ConcentricCircles() {
 
             let currentRadius = 0;
 
-
-
-            let start: number, previousTimeStamp;
-            let done = false;
-
             const step = () => {
                 if (ctx && canvas) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);

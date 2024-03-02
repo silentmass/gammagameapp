@@ -1,5 +1,4 @@
 'use client'
-import { useRef, useEffect } from 'react';
 import ConcentricCircles from '@/app/ui/concentric-circles';
 
 export default function Page() {

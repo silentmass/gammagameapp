@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 
-export default function FlickeringLight() {
+export default function Transform() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
@@ -8,9 +8,11 @@ export default function FlickeringLight() {
 
         let animationFrameId: number;
         let previousChangeFrame = 0;
-        let lightOn = true;
+        let expand = true;
         const flickerFrequency = 40;
         const flickerInterval = 1 / (flickerFrequency / 60);
+        let transformIncrement = 10;
+        let currentTransformIncrement = 0;
 
         if (canvas) {
             const centerX = canvas.width / 2;
@@ -20,15 +22,28 @@ export default function FlickeringLight() {
 
             const step = () => {
                 if (ctx && canvas) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (!expand) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+
 
                     if (animationFrameId > previousChangeFrame + flickerInterval) {
                         previousChangeFrame = animationFrameId;
-                        lightOn = !lightOn;
+                        expand = !expand;
+                        transformIncrement = -transformIncrement;
                     }
 
-                    ctx.fillRect(centerX - 50, centerY - 50, 100, 100);
-                    ctx.fillStyle = lightOn ? 'white' : 'black';
+                    currentTransformIncrement = (animationFrameId - previousChangeFrame) * transformIncrement;
+
+                    ctx.fillStyle = 'white';
+
+                    ctx.fillRect(
+                        centerX - 50 - currentTransformIncrement,
+                        centerY - 50 - currentTransformIncrement,
+                        100 + 2 * currentTransformIncrement,
+                        100 + 2 * currentTransformIncrement
+                    );
+
 
 
                     animationFrameId = window.requestAnimationFrame(step);
