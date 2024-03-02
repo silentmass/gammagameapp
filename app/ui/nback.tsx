@@ -28,7 +28,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
     const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-    const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
+    const [targetStimulusMatches, setTargetStimulusMatches] = useState("NONE SELECTED");
     const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
     const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
     const [nback, setNback] = useState(2);
@@ -43,7 +43,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
         setStimulusHistory(prevHistory => [...prevHistory, { ...newStimulus, visible: true }]);
         console.log(stimulusHistory[stimulusHistory.length - 1]);
 
-        setTargetStimulusMatches("");
+        setTargetStimulusMatches("NONE SELECTED");
     }
 
 
@@ -130,7 +130,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                 }
             </div>
             <div className='flex max-w-2xl w-full flex-col items-center p-0 border border-slate-500 rounded'>
-                <div className="flex h-8 border-0 items-center justify-center">
+                <div className="flex border-0 items-center justify-center">
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
                     </p>
