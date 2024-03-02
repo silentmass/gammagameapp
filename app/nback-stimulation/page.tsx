@@ -61,9 +61,13 @@ export default function Page() {
         let timer = setTimeout(() => hideStimulus(), 2000);
     }
 
-    function clearStimulusTimer(timer: number) {
+    function clearStimulusTimer() {
         console.log("Clear timer");
-        clearInterval(timer);
+
+        if (Ref.current !== null) {
+            clearInterval(Ref.current);
+            Ref.current = null; // Reset the ref after clearing the interval
+        }
     }
 
     function startStimulusTimer() {
@@ -77,7 +81,7 @@ export default function Page() {
             Ref.current = setInterval(() => startStimulusTimer(), 3000);
         } else {
             setStimulusTimerOn(!stimulusTimerOn);
-            clearStimulusTimer(Ref.current);
+            clearStimulusTimer();
         }
     }
 

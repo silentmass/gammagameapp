@@ -33,7 +33,7 @@ export default function Home() {
   const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
   const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
   const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
-  const Ref = useRef(null);
+  const Ref = useRef<number | null>(null);
 
   function getRandomStimulus(start: number, stop: number) {
     const minInt = Math.ceil(start);
@@ -59,9 +59,13 @@ export default function Home() {
     let timer = setTimeout(() => hideStimulus(), 2000);
   }
 
-  function clearStimulusTimer(timer: number) {
+  function clearStimulusTimer() {
     console.log("Clear timer");
-    clearInterval(timer);
+
+    if (Ref.current !== null) {
+      clearInterval(Ref.current);
+      Ref.current = null; // Reset the ref after clearing the interval
+    }
   }
 
   function startStimulusTimer() {
@@ -75,7 +79,7 @@ export default function Home() {
       Ref.current = setInterval(() => startStimulusTimer(), 3000);
     } else {
       setStimulusTimerOn(!stimulusTimerOn);
-      clearStimulusTimer(Ref.current);
+      clearStimulusTimer();
     }
   }
 
