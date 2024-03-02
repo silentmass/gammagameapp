@@ -61,7 +61,7 @@ export default function Page() {
         let timer = setTimeout(() => hideStimulus(), 2000);
     }
 
-    function clearStimulusTimer(timer) {
+    function clearStimulusTimer(timer: number) {
         console.log("Clear timer");
         clearInterval(timer);
     }
