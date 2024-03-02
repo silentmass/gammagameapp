@@ -30,12 +30,12 @@ export default function Page() {
 
     const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
     const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-    const [targetStimulus, setTargetStimulus] = useState({});
+    const [targetStimulus, setTargetStimulus] = useState<StimulusFetched>({});
     const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
     const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
     const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
     const [nback, setNback] = useState(2);
-    const Ref = useRef(null);
+    const Ref = useRef<number | null>(null);
 
     function getRandomStimulus(start: number, stop: number) {
         const minInt = Math.ceil(start);
@@ -78,7 +78,8 @@ export default function Page() {
     function startStopStimulusTimer() {
         if (!stimulusTimerOn) {
             setStimulusTimerOn(!stimulusTimerOn);
-            Ref.current = setInterval(() => startStimulusTimer(), 3000);
+            const timer = setInterval(() => startStimulusTimer(), 3000);
+            Ref.current = Number(timer);
         } else {
             setStimulusTimerOn(!stimulusTimerOn);
             clearStimulusTimer();

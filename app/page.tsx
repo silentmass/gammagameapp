@@ -29,7 +29,7 @@ export default function Home() {
 
   const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
   const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-  const [targetStimulus, setTargetStimulus] = useState({});
+  const [targetStimulus, setTargetStimulus] = useState<StimulusFetched>({});
   const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
   const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
   const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
@@ -76,7 +76,8 @@ export default function Home() {
   function startStopStimulusTimer() {
     if (!stimulusTimerOn) {
       setStimulusTimerOn(!stimulusTimerOn);
-      Ref.current = setInterval(() => startStimulusTimer(), 3000);
+      const timer = setInterval(() => startStimulusTimer(), 3000);
+      Ref.current = Number(timer);
     } else {
       setStimulusTimerOn(!stimulusTimerOn);
       clearStimulusTimer();
