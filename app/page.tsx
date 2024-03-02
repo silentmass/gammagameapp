@@ -28,7 +28,7 @@ export default function Home() {
 
 
   const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
-  const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched>([]);
+  const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
   const [targetStimulus, setTargetStimulus] = useState({});
   const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
   const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
