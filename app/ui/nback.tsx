@@ -115,14 +115,14 @@ export default function Nback({ children }: { children: React.ReactNode }) {
 
     return (
         <>
-            <div className="z-10 max-w-2xl h-12 h-full items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
+            <div className="z-10 max-w-2xl min-h-12 h-full items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
                 {
                     newStimuli.map((stimulus) => (
                         <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
                     ))
                 }
             </div>
-            <div className="z-10 grid grid-cols-10 gap-0 max-w-2xl h-12 h-full content-normal font-mono text-xs border border-slate-500 p-0 rounded">
+            <div className="z-10 grid grid-cols-10 place-items-center gap-0 max-w-2xl min-h-12 h-full content-normal font-mono text-xs border border-slate-500 p-0 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
@@ -130,7 +130,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                 }
             </div>
             <div className='flex max-w-2xl w-full flex-col items-center p-0 border border-slate-500 rounded'>
-                <div className="flex h-12 border-0 items-center justify-center">
+                <div className="flex h-8 border-0 items-center justify-center">
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
                     </p>
@@ -146,7 +146,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                     </div>
                 </div>
             </div>
-            <div className="z-10 max-w-2xl justify-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
+            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
                 <button
                     className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
                     onClick={() => logTargetMatchNBack(nback)}>
