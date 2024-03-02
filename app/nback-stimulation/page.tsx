@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import StimulusLabel from '@/app/ui/StimulusLabel';
+import StimulusLabel from '@/app/ui/stimuluslabel';
 import ConcentricCircles from '@/app/ui/concentric-circles';
 
 const stimuli = [
@@ -149,7 +149,8 @@ export default function Page() {
             <div className="z-10 max-w-2xl w-full justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
                 {[1, 2, 3, 4].map(nbackValue => (
                     <button
-                        className={`border border-slate-500 p-3 bg-slate-${Number(nback) === nbackValue ? 700 : '500/0'} rounded hover:bg-slate-500 active:bg-slate-700 focus:ring`}
+                        key={nbackValue}
+                        className={`border border-slate-500 p-3 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'}`}
                         onClick={() => setNback(nbackValue)}>
                         {nbackValue}-Back
                     </button>
