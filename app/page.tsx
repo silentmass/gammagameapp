@@ -29,7 +29,7 @@ export default function Home() {
 
   const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
   const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-  const [targetStimulus, setTargetStimulus] = useState<StimulusFetched>({});
+  const [targetStimulus, setTargetStimulus] = useState<StimulusFetched | null>(null);
   const [targetStimulusMatches, setTargetStimulusMatches] = useState("");
   const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
   const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
@@ -50,7 +50,9 @@ export default function Home() {
 
   function hideStimulus(): void {
     console.log("setTimeout");
-    setTargetStimulus({ ...targetStimulus, visible: false });
+    if (targetStimulus) {
+      setTargetStimulus({ ...targetStimulus, visible: false });
+    }
   }
 
   function showStimulus(start: number, stop: number): void {
@@ -132,7 +134,7 @@ export default function Home() {
       </div>
       <div>
         <p
-          className={`text-4xl ${"visible" in targetStimulus && targetStimulus.visible ? "" : "hidden"}`}
+          className={`text-4xl ${targetStimulus && "visible" in targetStimulus && targetStimulus.visible ? "" : "hidden"}`}
         >
           {targetStimulus?.label ?? ''}
         </p>

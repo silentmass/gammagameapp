@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 
 export default function ConcentricCircles() {
-    const canvasRef = useRef(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -14,7 +14,7 @@ export default function ConcentricCircles() {
             const maxRadius = 200;
             let radius = 0;
             const numberOfCircles = 10;
-            let animationFrameId;
+            let animationFrameId: number;
             let radiusStep = -0.2;
 
             let currentRadius = 0;
@@ -25,48 +25,31 @@ export default function ConcentricCircles() {
             let done = false;
 
             function step() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (ctx && canvas) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                for (let i = 0; i < numberOfCircles; i++) {
-                    ctx.beginPath();
-                    currentRadius = radiusIncrement * (i + 1) + radius;
-                    if (currentRadius < 0) {
-                        currentRadius = radiusIncrement * numberOfCircles + currentRadius;
+                    for (let i = 0; i < numberOfCircles; i++) {
+                        ctx.beginPath();
+                        currentRadius = radiusIncrement * (i + 1) + radius;
+                        if (currentRadius < 0) {
+                            currentRadius = radiusIncrement * numberOfCircles + currentRadius;
+                        }
+                        ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI, false);
+                        ctx.strokeStyle = "white";
+                        ctx.lineWidth = radiusIncrement / 2;
+                        ctx.stroke();
                     }
-                    ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI, false);
-                    ctx.strokeStyle = "white";
-                    ctx.lineWidth = radiusIncrement / 2;
-                    ctx.stroke();
+
+                    radius += radiusStep;
+
+                    if (radius > -maxRadius) {
+                        animationFrameId = window.requestAnimationFrame(step);
+                    } else {
+                        radius = radius + maxRadius - radiusIncrement / 2;
+                        animationFrameId = window.requestAnimationFrame(step);
+                    }
                 }
 
-                radius += radiusStep;
-
-                if (radius > -maxRadius) {
-                    animationFrameId = window.requestAnimationFrame(step);
-                } else {
-                    radius = radius + maxRadius - radiusIncrement / 2;
-                    animationFrameId = window.requestAnimationFrame(step);
-                }
-
-
-
-                // if (start === undefined) {
-                //     start = timeStamp;
-                // }
-                // const elapsed = timeStamp - start;
-
-                // if (previousTimeStamp !== timeStamp) {
-                //     const count = Math.min(0.1 * elapsed, 200);
-                //     canvas.style.transform = `translateX(${count})px`;
-                //     if (count === 200) done = true;
-                // }
-
-                // if (elapsed < 200) {
-                //     previousTimeStamp = timeStamp;
-                //     if (!done) {
-                //         window.requestAnimationFrame(step);
-                //     }
-                // }
             }
 
             step();
