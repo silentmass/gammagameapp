@@ -132,7 +132,7 @@ export default function Nback({ children }: { children: React.ReactNode }) {
                 }
             </div>
             <div className='flex max-w-2xl w-full flex-col items-center p-0 border border-slate-500 rounded'>
-                <div className="flex border-0 items-center justify-center">
+                <div className="flex h-12 border-0 items-center justify-center">
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
                     </p>
