@@ -42,34 +42,62 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
     const [nback, setNback] = useState(2);
     const [showTarget, setShowTarget] = useState(true);
     const [selectClicked, setSelectClicked] = useState(false);
+    const [correctActionCount, setCorrectActionCount] = useState(0);
 
     const timerRef = useRef<number | null>(null);
     const stimulusHistoryRef = useRef<StimulusFetched[]>([]);
+    const correctActionCountRef = useRef<number>(0);
+    const selectClickedRef = useRef<boolean>(false);
 
     useEffect(() => {
         if (stimulusHistoryRef !== null) {
             stimulusHistoryRef.current = stimulusHistory;
+            console.log('useEffect stimulusHistory');
         }
     }, [stimulusHistory]);
 
+    useEffect(() => {
+        correctActionCountRef.current = correctActionCount;
+    }, [correctActionCount]);
+
+    useEffect(() => {
+        selectClickedRef.current = selectClicked;
+    }, [selectClicked]);
+
+    const getNewStimulusHistory = (stimulus: StimulusFetched | null) => {
+        const newStimulusHistory = stimulus ? [...stimulusHistoryRef.current, stimulus] : stimulusHistoryRef.current;
+        const nStimuli = newStimulusHistory.length;
+        return { newStimulusHistory: newStimulusHistory, nStimuli: nStimuli };
+    }
+
+    function targetMatchNBack(stimulus: StimulusFetched) {
+        // nback 2 and history 1
+        // nback 1 and history 1
+        // nback 1 and history 2
+        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
+        if (newStimulusHistory.length > nback) {
+            const res = nStimuli > nback && newStimulusHistory[nStimuli - 1].id === newStimulusHistory[nStimuli - 1 - nback].id;
+            return res;
+        } else {
+            return false;
+        }
+    }
 
     function getRandomStimulus(start: number, stop: number) {
         const minInt = Math.ceil(start);
         const maxInt = Math.floor(stop);
         const randomStimulusIdx = Math.floor(Math.random() * (maxInt - minInt + 1) + minInt);
         const newStimulus = newStimuli[randomStimulusIdx];
-        console.log(newStimulus);
         return newStimulus;
     }
 
 
     function hideStimulus(): void {
-        console.log("setTimeout");
+        console.log("hideStimulus");
         setShowTarget(false);
     }
 
     function showStimulus(): void {
-
         console.log("showStimulus")
         if (stimulusDuration) {
             let timer = setTimeout(() => hideStimulus(), stimulusDuration);
@@ -85,49 +113,70 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         }
     }
 
-    function targetMatchNBack() {
-        // nback 2 and history 1
-        // nback 1 and history 1
-        // nback 1 and history 2
-        if (stimulusHistoryRef.current.length > nback) {
-            const res = stimulusHistoryRef.current.length > nback && stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1].id === stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1 - nback].id;
-            return res;
+    const setSelectionLabel = (stimulus: StimulusFetched) => {
+        if (!selectClicked) {
+            setTargetStimulusMatches("NONE SELECTED");
         } else {
-            return false;
+            if (targetMatchNBack(stimulus)) {
+                setTargetStimulusMatches("MATCH");
+            } else {
+                setTargetStimulusMatches("NO MATCH");
+            }
         }
-
     }
 
-    const countCorrectAction = () => {
-        setStimulusMatchesCount(prevCount => prevCount + 1);
-    }
+    const evaluateAction = (clicked: boolean, stimulus: StimulusFetched | null) => {
+        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
+        const currentStimulus = newStimulusHistory[nStimuli - 1];
 
-
-    function logTargetMatchNBack() {
-        if (targetMatchNBack()) {
-            console.log("Match")
-            countCorrectAction();
+        if (clicked) {
+            if (nStimuli > nback) {
+                if (currentStimulus && targetMatchNBack(currentStimulus)) {
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                    setTargetStimulusMatches(prevMatchCount => prevMatchCount + 1);
+                }
+            }
         } else {
-            console.log("No match")
+            console.log('Evaluating no action');
+            if (nStimuli > nback) {
+                if (!targetMatchNBack(currentStimulus)) {
+                    console.log('Point, stimuli do not match');
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                } else {
+                    console.log('No point, stimuli do match');
+                }
+            } else {
+                if (nStimuli > 0) {
+                    console.log('Point, not enough stimuli');
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                } else {
+                    console.log('No point, no stimuli');
+                }
+            }
         }
-        setTargetStimulusMatches(targetMatchNBack() ? 'MATCH' : 'NO MATCH');
     }
 
     const startStimulusTimer = () => {
-        console.log('startStimulusTimer', 'selectClicked:', selectClicked, 'stimulusHistory.length:', stimulusHistoryRef.current.length)
-        // Evaluate forced choice action of not selecting a stimulus
-        // None selected and stimulus history has data
-        if (!selectClicked && (stimulusHistoryRef.current.length <= nback || !targetMatchNBack())) {
-            // Force to correct if history length is smaller or equal to nback or
-            countCorrectAction();
-        };
+        // evaluate previous action
+        if (!selectClickedRef.current) {
+            evaluateAction(selectClickedRef.current, null);
+            console.log(selectClicked, 'Previous evaluated');
+        }
+        if (selectClickedRef.current) {
+            setSelectClicked(false);
+            console.log('Setting clicked to false');
+        }
 
-        setSelectClicked(false);
         const newStimulus = getRandomStimulus(0, newStimuli.length - 1);
-        setStimulusHistory(prevHistory => [...prevHistory, newStimulus]);
-        setTargetStimulusMatches("NONE SELECTED");
+        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(newStimulus);
+
         setShowTarget(true);
         showStimulus();
+        setSelectionLabel(newStimulus);
+        setStimulusHistory(prevHistory => [...prevHistory, newStimulus]);
+
+        console.log(newStimulusHistory.length, targetMatchNBack(newStimulus) ? 'MATCH' : 'NO MATCH', newStimulus);
+
     }
 
     const startStopStimulusTimer = () => {
@@ -159,8 +208,11 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
     function onSelectClick() {
         if (!selectClicked) {
             setSelectClicked(true);
-            logTargetMatchNBack();
             console.log('Clicked');
+            const currentStimulus = stimulusHistory[stimulusHistory.length - 1];
+            evaluateAction(true, currentStimulus);
+            console.log('Clicked', currentStimulus);
+            setSelectionLabel(currentStimulus);
         }
     }
 
@@ -191,9 +243,9 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                     {children}
                     <div className='absolute top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border-0 rounded border-sky-500'>
                         <p
-                            className={`text-4xl ${stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1] && "visible" in stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1] && showTarget ? "" : "hidden"}`}
+                            className={`text-4xl ${showTarget ? "" : "hidden"}`}
                         >
-                            {stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1] && 'label' in stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1] ? stimulusHistoryRef.current[stimulusHistoryRef.current.length - 1].label : ''}
+                            {stimulusHistory.length > 0 ? stimulusHistory[stimulusHistory.length - 1].label : ''}
                         </p>
                     </div>
                 </div>
@@ -209,7 +261,7 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                     onClick={() => startStopStimulusTimer()}>
                     {stimulusTimerOn ? "Stop" : "Start"}
                 </button>
-                <p>{stimulusMatchesCount}|({stimulusHistoryRef.current.length})</p>
+                <p>{correctActionCount}|({stimulusHistoryRef.current.length})</p>
             </div>
             <div className="z-10 max-w-2xl justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
                 {[1, 2, 3, 4].map(nbackValue => (
