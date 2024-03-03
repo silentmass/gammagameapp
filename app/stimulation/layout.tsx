@@ -2,11 +2,11 @@ import NavLinks from "@/app/ui/nav-links";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-sreen flex-col md:flex-row md:overflow-hidden">
-      <div className="flex p-0 mf:overflow-y-auto md:p-0 border">{children}</div>
-      <div className="w-full h-full flex-wrap md:w-64 border">
+    <main className="flex min-h-screen flex-col justify-center items-center p-0">
+      <div className="flex p-0 md:items-center">{children}</div>
+      <div className="flex md:flex max-w-xs items-center justify-center flex-wrap">
         <NavLinks />
       </div>
-    </div>
+    </main>
   );
 }
