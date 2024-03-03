@@ -10,18 +10,23 @@ export default function ConcentricCircles() {
 
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
-            const radiusIncrement = 19;
-            const maxRadius = 200;
+            const radiusIncrement = 17;
             let radius = 0;
-            const numberOfCircles = 10;
+            const numberOfCircles = 20;
+            const maxRadius = radiusIncrement * numberOfCircles;
             let animationFrameId: number;
             let radiusStep = -0.2;
 
             let currentRadius = 0;
 
             const step = () => {
-                if (ctx && canvas) {
+                if (ctx) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw mask
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 200, 0, Math.PI * 2);
+                    ctx.clip()
 
                     for (let i = 0; i < numberOfCircles; i++) {
                         ctx.beginPath();
