@@ -10,7 +10,7 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
     };
 
     if (!interStimulusInterval) {
-        interStimulusInterval = 1600;
+        interStimulusInterval = 1600 + stimulusDuration;
     }
 
     const stimuli = [
@@ -226,14 +226,14 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                     ))
                 }
             </div>
-            <div className="z-10 h-full grid grid-cols-10 place-items-center gap-0 max-w-2xl content-normal font-mono text-xs border border-slate-500 p-0 rounded">
+            <div className="min-h-14 z-10 h-full grid grid-cols-10 place-items-center gap-0 max-w-2xl content-normal font-mono text-xs border border-slate-500 p-0 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
                     ))
                 }
             </div>
-            <div className='flex max-w-2xl h-full w-full flex-col items-center p-0 border border-slate-500 rounded'>
+            <div className='max-w-2xl h-full w-full flex-col items-center p-0 border border-slate-500 rounded'>
                 <div className="flex border-0 items-center justify-center">
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
@@ -250,18 +250,22 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                     </div>
                 </div>
             </div>
-            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-5 rounded">
+            <div className="z-10 w-full max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-1 rounded">
                 <button
-                    className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
+                    className="w-full max-w-2xl justify-self-center items-center border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
                     onClick={() => onSelectClick()}>
                     Select
                 </button>
+            </div>
+            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-1 rounded">
+                <p>{correctActionCount}|({stimulusHistoryRef.current.length})</p>
+            </div>
+            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-2 pb-2 rounded">
                 <button
                     className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
                     onClick={() => startStopStimulusTimer()}>
                     {stimulusTimerOn ? "Stop" : "Start"}
                 </button>
-                <p>{correctActionCount}|({stimulusHistoryRef.current.length})</p>
             </div>
             <div className="z-10 max-w-2xl justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
                 {[1, 2, 3, 4].map(nbackValue => (
