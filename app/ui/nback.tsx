@@ -43,6 +43,7 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
     const [showTarget, setShowTarget] = useState(true);
     const [selectClicked, setSelectClicked] = useState(false);
     const [correctActionCount, setCorrectActionCount] = useState(0);
+    const [correctAction, setCorrectAction] = useState(false);
 
     const timerRef = useRef<number | null>(null);
     const stimulusHistoryRef = useRef<StimulusFetched[]>([]);
@@ -91,10 +92,53 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         return newStimulus;
     }
 
+    const evaluateAction = (clicked: boolean, stimulus: StimulusFetched | null) => {
+        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
+        const currentStimulus = newStimulusHistory[nStimuli - 1];
+
+        if (clicked) {
+            if (nStimuli > nback) {
+                if (currentStimulus && targetMatchNBack(currentStimulus)) {
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                    setTargetStimulusMatches(prevMatchCount => prevMatchCount + 1);
+                    setCorrectAction(true);
+                }
+            }
+        } else {
+            console.log('Evaluating no action');
+            if (nStimuli > nback) {
+                if (!targetMatchNBack(currentStimulus)) {
+                    console.log('Point, stimuli do not match');
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                    setCorrectAction(true);
+                } else {
+                    console.log('No point, stimuli do match');
+                }
+            } else {
+                if (nStimuli > 0) {
+                    console.log('Point, not enough stimuli');
+                    setCorrectActionCount(prevCount => prevCount + 1);
+                    setCorrectAction(true);
+                } else {
+                    console.log('No point, no stimuli');
+                }
+            }
+        }
+    }
 
     function hideStimulus(): void {
         console.log("hideStimulus");
         setShowTarget(false);
+
+        // evaluate previous action
+        if (selectClickedRef.current) {
+            setSelectClicked(false);
+            console.log('Setting clicked to false');
+        }
+
+        evaluateAction(selectClickedRef.current, null);
+
+        console.log(selectClicked, 'Previous evaluated');
     }
 
     function showStimulus(): void {
@@ -113,66 +157,17 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         }
     }
 
-    const setSelectionLabel = (stimulus: StimulusFetched) => {
-        if (!selectClicked) {
-            setTargetStimulusMatches("NONE SELECTED");
-        } else {
-            if (targetMatchNBack(stimulus)) {
-                setTargetStimulusMatches("MATCH");
-            } else {
-                setTargetStimulusMatches("NO MATCH");
-            }
-        }
-    }
 
-    const evaluateAction = (clicked: boolean, stimulus: StimulusFetched | null) => {
-        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
-        const currentStimulus = newStimulusHistory[nStimuli - 1];
-
-        if (clicked) {
-            if (nStimuli > nback) {
-                if (currentStimulus && targetMatchNBack(currentStimulus)) {
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                    setTargetStimulusMatches(prevMatchCount => prevMatchCount + 1);
-                }
-            }
-        } else {
-            console.log('Evaluating no action');
-            if (nStimuli > nback) {
-                if (!targetMatchNBack(currentStimulus)) {
-                    console.log('Point, stimuli do not match');
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                } else {
-                    console.log('No point, stimuli do match');
-                }
-            } else {
-                if (nStimuli > 0) {
-                    console.log('Point, not enough stimuli');
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                } else {
-                    console.log('No point, no stimuli');
-                }
-            }
-        }
-    }
 
     const startStimulusTimer = () => {
-        // evaluate previous action
-        if (!selectClickedRef.current) {
-            evaluateAction(selectClickedRef.current, null);
-            console.log(selectClicked, 'Previous evaluated');
-        }
-        if (selectClickedRef.current) {
-            setSelectClicked(false);
-            console.log('Setting clicked to false');
-        }
-
         const newStimulus = getRandomStimulus(0, newStimuli.length - 1);
         const { newStimulusHistory, nStimuli } = getNewStimulusHistory(newStimulus);
 
+        setCorrectAction(false);
+
         setShowTarget(true);
         showStimulus();
-        setSelectionLabel(newStimulus);
+        setTargetStimulusMatches('NONE SELECTED');
         setStimulusHistory(prevHistory => [...prevHistory, newStimulus]);
 
         console.log(newStimulusHistory.length, targetMatchNBack(newStimulus) ? 'MATCH' : 'NO MATCH', newStimulus);
@@ -209,24 +204,21 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         if (!selectClicked) {
             setSelectClicked(true);
             console.log('Clicked');
-            const currentStimulus = stimulusHistory[stimulusHistory.length - 1];
-            evaluateAction(true, currentStimulus);
-            console.log('Clicked', currentStimulus);
-            setSelectionLabel(currentStimulus);
+            setTargetStimulusMatches('SELECTED');
         }
     }
 
 
     return (
         <>
-            <div className="z-10 max-w-2xl h-full items-center justify-center font-mono text-xl lg:flex border border-slate-500 p-0 rounded">
+            <div className="min-h-8 flex z-10 max-w-2xl items-center justify-center font-mono text-xl border-0 border-slate-500 p-1 rounded gap-1">
                 {
                     newStimuli.map((stimulus) => (
                         <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
                     ))
                 }
             </div>
-            <div className="min-h-14 z-10 h-full grid grid-cols-10 place-items-center gap-0 max-w-2xl content-normal font-mono text-xs border border-slate-500 p-0 rounded">
+            <div className="min-h-8 z-10 grid grid-cols-10 place-items-center gap-1 max-w-2xl content-normal font-mono text-xs border-0 border-slate-500 p-1 rounded">
                 {
                     stimulusHistory.slice(-10).map((stimulus, idx) => (
                         <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
@@ -234,13 +226,13 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                 }
             </div>
             <div className='max-w-2xl h-full w-full flex-col items-center p-0 border border-slate-500 rounded'>
-                <div className="flex border-0 items-center justify-center">
+                <div className={`flex border-0 items-center justify-center rounded ${showTarget ? '' : correctAction ? 'bg-sky-950' : 'bg-rose-950'}`}>
                     <p className={`text-xs border-0`}>
                         {targetStimulusMatches}
                     </p>
                 </div>
                 <div className='flex min-h-14 relative w-full h-full justify-center items-center'>
-                    {children}
+                    <div>{children}</div>
                     <div className='absolute top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border-0 rounded border-sky-500'>
                         <p
                             className={`text-4xl ${showTarget ? "" : "hidden"}`}
@@ -252,7 +244,7 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
             </div>
             <div className="z-10 w-full max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-1 rounded">
                 <button
-                    className="w-full max-w-2xl justify-self-center items-center border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
+                    className={`w-full max-w-2xl justify-self-center items-center border border-slate-500 p-3 rounded bg-black-500/0 focus:ring ${!showTarget ? '' : 'hover:bg-slate-800 active:bg-slate-900'}`}
                     onClick={() => onSelectClick()}>
                     Select
                 </button>
