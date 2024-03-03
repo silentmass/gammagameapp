@@ -49,7 +49,6 @@ export default function ConcentricCircles() {
                         animationFrameId = window.requestAnimationFrame(step);
                     }
                 }
-
             }
 
             step();
