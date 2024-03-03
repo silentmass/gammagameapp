@@ -1,9 +1,10 @@
 'use client'
 import ConcentricCircles from '@/app/ui/concentric-circles';
 
+
 export default function Page() {
     return (
-        <div className='flex min-h-screen flex-col items-center p-24'>
+        <div className='flex min-h-screen flex-col items-center'>
             <div><p>Stimulation</p></div>
             <div className='flex relative w-full h-full justify-center items-center'>
                 <ConcentricCircles />

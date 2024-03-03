@@ -13,8 +13,8 @@ export default function Transform() {
         const flickerInterval = 1 / (flickerFrequency / 60);
         let transformIncrement = 1;
         let currentTransformIncrement = 0;
-        const whiteRectWidth = 50;
-        const blackRectWidth = 20;
+        const whiteRectWidth = 150;
+        const blackRectWidth = 80;
 
         if (canvas) {
             const centerX = canvas.width / 2;

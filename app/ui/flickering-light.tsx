@@ -12,6 +12,8 @@ export default function FlickeringLight() {
         const flickerFrequency = 40;
         const flickerInterval = 1 / (flickerFrequency / 60);
 
+        const canvasSide = 200;
+
         if (canvas) {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
@@ -27,7 +29,7 @@ export default function FlickeringLight() {
                         lightOn = !lightOn;
                     }
 
-                    ctx.fillRect(centerX - 50, centerY - 50, 100, 100);
+                    ctx.fillRect(centerX - canvasSide / 2, centerY - canvasSide / 2, canvasSide, canvasSide);
                     ctx.fillStyle = lightOn ? 'white' : 'black';
 
 

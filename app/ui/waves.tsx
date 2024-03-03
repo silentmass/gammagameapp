@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 export default function Waves() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const canvasSide = 370;
+    const canvasSide = 350;
     const numberOfCircles = 10;
     const radiusIncrement = canvasSide / 2 / numberOfCircles;
     let radius = 0;
@@ -15,71 +15,89 @@ export default function Waves() {
     const animatedCyclesPerRadius = 2;
     const animatedCyclesPerSecond = 0.5;
 
+    const opacityInitialPhase = (currentTime: number) => {
+        return (currentTime / 1000) * 2 * Math.PI * animatedCyclesPerSecond;
+    }
+
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+        const mainCanvas = canvasRef.current;
+        const offscreenCanvas = document.createElement("canvas");
 
-            const step = () => {
-                if (ctx) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (mainCanvas) {
+            const centerX = mainCanvas.width / 2;
+            const centerY = mainCanvas.height / 2;
 
-                    // Draw mask
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, canvasSide / 2, 0, Math.PI * 2);
-                    ctx.clip()
-
-                    // Concentric circles
-                    for (let i = 0; i < numberOfCircles; i++) {
-                        ctx.beginPath();
-                        currentRadius = radiusIncrement * (i + 1) + radius;
-                        if (currentRadius < 0) {
-                            currentRadius = radiusIncrement * numberOfCircles + currentRadius;
-                        }
-                        ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI, false);
-                        ctx.strokeStyle = "white";
-                        ctx.lineWidth = radiusIncrement / 2;
-                        ctx.stroke();
-                    }
-
-                    const imageData = ctx.getImageData(0, 0, canvasSide, canvasSide);
-                    let currentTime = Date.now();
-                    let domega = (currentTime / 1000) * 2 * Math.PI * animatedCyclesPerSecond;
-
-                    // Fill the array with RGBA values
-                    for (let i = 0; i < imageData.data.length; i += 4) {
-                        // Percentage in the x direction
-                        let x = (i % (4 * canvasSide) / (4 * canvasSide));
-                        // Percentage in the y direction
-                        let y = (Math.ceil(i / (4 * canvasSide)) / canvasSide);
-
-                        let ud = x * canvasSide - centerX;
-                        let vd = y * canvasSide - centerY;
-                        let h = Math.sqrt(Math.pow(ud, 2) + Math.pow(vd, 2));
-
-                        let z = 255 * (1 + Math.sin(domega + (h / (canvasSide / 2) * 2 * Math.PI * animatedCyclesPerRadius))) / 2;
-                        if (imageData) {
-                            // imageData.data[i + 0] = 255;
-                            // imageData.data[i + 1] = 255;
-                            // imageData.data[i + 2] = 255;
-                            imageData.data[i + 3] = z;
-
-                        }
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-
-                    animationFrameId = window.requestAnimationFrame(step);
-
-                }
+            const pixelDistanceFromOrigin = (i: number) => {
+                return Math.sqrt(Math.pow(((i % (4 * canvasSide) / (4 * canvasSide)) * canvasSide - centerX), 2) + Math.pow(((Math.ceil(i / (4 * canvasSide)) / canvasSide) * canvasSide - centerY), 2));
             }
 
-            step();
+            offscreenCanvas.width = mainCanvas.width;
+            offscreenCanvas.height = mainCanvas.height;
 
-            return () => {
-                window.cancelAnimationFrame(animationFrameId);
-            };
+            const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+            const mainCtx = mainCanvas.getContext('2d', { willReadFrequently: true });
+
+            if (offscreenCtx) {
+                offscreenCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+                // Concentric circles
+                for (let i = 0; i < numberOfCircles; i++) {
+                    offscreenCtx.beginPath();
+                    currentRadius = radiusIncrement * (i + 1) + radius;
+                    if (currentRadius < 0) {
+                        currentRadius = radiusIncrement * numberOfCircles + currentRadius;
+                    }
+                    offscreenCtx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI, false);
+                    offscreenCtx.strokeStyle = "white";
+                    offscreenCtx.lineWidth = radiusIncrement / 2;
+                    offscreenCtx.stroke();
+                }
+
+                const imageData = offscreenCtx.getImageData(0, 0, canvasSide, canvasSide);
+
+
+                if (mainCtx) {
+                    // Draw mask
+                    mainCtx.beginPath();
+                    mainCtx.arc(centerX, centerY, canvasSide / 2, 0, Math.PI * 2);
+                    mainCtx.clip()
+                }
+
+
+
+                const step = () => {
+                    if (mainCtx) {
+                        mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+                        mainCtx.drawImage(offscreenCanvas, 0, 0);
+
+                        let currentTime = Date.now();
+
+                        // Fill the array with RGBA values
+                        for (let i = 0; i < imageData.data.length; i += 4) {
+                            if (imageData) {
+                                // imageData.data[i + 0] = 255;
+                                // imageData.data[i + 1] = 255;
+                                // imageData.data[i + 2] = 255;
+                                imageData.data[i + 3] = Math.floor(255 * (1 + Math.sin(opacityInitialPhase(currentTime) + (pixelDistanceFromOrigin(i) / (canvasSide / 2) * 2 * Math.PI * animatedCyclesPerRadius))) / 2);
+                            }
+                        }
+                        mainCtx.putImageData(imageData, 0, 0);
+
+                        animationFrameId = window.requestAnimationFrame(step)
+                    }
+
+
+                }
+
+                step();
+
+                return () => {
+                    window.cancelAnimationFrame(animationFrameId);
+                };
+            }
+
+
 
 
 
@@ -91,4 +109,6 @@ export default function Waves() {
     return (
         <canvas className='' ref={canvasRef} width={`${canvasSide}`} height={`${canvasSide}`} />
     );
+
+
 }
