@@ -15,7 +15,13 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
 
     const stimuli = [
         { label: "🍎" },
-        { label: "🍊" }
+        { label: "🍊" },
+        { label: "🍐" },
+        { label: "🍇" },
+        { label: "🍋" },
+        { label: "🍍" },
+        { label: "🍉" },
+        { label: "🫐" },
     ];
 
     interface Stimulus {
