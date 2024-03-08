@@ -2,6 +2,40 @@
 
 import { useEffect, useRef, useState } from "react";
 import StimulusLabel from '@/app/ui/stimuluslabel';
+import StimulusHistory from "@/app/ui/stimulushistory";
+
+export const targets = [
+    { label: "🍎" },
+    { label: "🍊" },
+    { label: "🍐" },
+    { label: "🍇" },
+];
+
+export interface Stimulus {
+    label: string
+}
+
+export interface TargetFetched {
+    label: string,
+    id: number,
+    selected: boolean,
+    visible: boolean
+}
+
+export interface ParadigmParameters {
+    isTargetVisible: boolean,
+    nback: number,
+}
+
+
+
+const getActionLabel = (action: boolean) => {
+    if (action) {
+        return 'SELECTED';
+    } else {
+        return 'NONE SELECTED';
+    }
+};
 
 export default function Nback({ children, stimulusDuration, interStimulusInterval, forcedChoice }: { children: React.ReactNode, stimulusDuration: number | null, interStimulusInterval: number | null, forcedChoice: number | null }) {
 
@@ -13,145 +47,126 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         interStimulusInterval = 1600 + stimulusDuration;
     }
 
-    const stimuli = [
-        { label: "🍎" },
-        { label: "🍊" },
-        { label: "🍐" },
-        { label: "🍇" },
-        { label: "🍋" },
-        { label: "🍍" },
-        { label: "🍉" },
-        { label: "🫐" },
-    ];
 
-    interface Stimulus {
-        label: string
-    }
-
-    interface StimulusFetched {
-        label: string,
-        id: number,
-        selected: boolean,
-        visible: boolean
-    }
-
-    function fetchStimuli(stimuli: Stimulus[]) {
-        return stimuli.map((stimulus, stimulusIdx) => ({ ...stimulus, id: stimulusIdx, selected: false, visible: true }));
+    function fetchStimuli(targets: Stimulus[]) {
+        return targets.map((stimulus, stimulusIdx) => ({ ...stimulus, id: stimulusIdx, selected: false, visible: true }));
     }
 
 
-    const [newStimuli, setNewStimuli] = useState(fetchStimuli(stimuli));
-    const [stimulusHistory, setStimulusHistory] = useState<StimulusFetched[]>([]);
-    const [targetStimulusMatches, setTargetStimulusMatches] = useState("NONE SELECTED");
-    const [stimulusTimerOn, setStimulusTimerOn] = useState(false);
-    const [stimulusMatchesCount, setStimulusMatchesCount] = useState(0);
-    const [nback, setNback] = useState(2);
-    const [showTarget, setShowTarget] = useState(true);
-    const [selectClicked, setSelectClicked] = useState(false);
+    const [fetchedTargetsList, setFetchedTargetsList] = useState(fetchStimuli(targets));
+    const [paradigmParameters, setParadigmParameters] = useState<ParadigmParameters>({
+        isTargetVisible: false,
+        nback: 2,
+    });
+    const [shownTargetsList, setShownTargetsList] = useState<TargetFetched[]>([]);
+    const [isTargetSelected, setIsTargetSelected] = useState(false);
+    const [isActionCorrect, setIsActionCorrect] = useState(Boolean);
+    const [isTargetVisible, setIsTargetVisible] = useState(false);
     const [correctActionCount, setCorrectActionCount] = useState(0);
-    const [correctAction, setCorrectAction] = useState(false);
 
     const timerRef = useRef<number | null>(null);
-    const stimulusHistoryRef = useRef<StimulusFetched[]>([]);
+    const shownTargetsRef = useRef<TargetFetched[]>([]);
+    const correctActionRef = useRef<boolean>(false);
     const correctActionCountRef = useRef<number>(0);
-    const selectClickedRef = useRef<boolean>(false);
+    const isTargetSelectedRef = useRef<boolean>(false);
+    const targetOnRef = useRef<boolean>(false);
 
     useEffect(() => {
-        if (stimulusHistoryRef !== null) {
-            stimulusHistoryRef.current = stimulusHistory;
-            console.log('useEffect stimulusHistory');
+        if (shownTargetsRef !== null) {
+            shownTargetsRef.current = shownTargetsList;
         }
-    }, [stimulusHistory]);
+    }, [shownTargetsList]);
 
     useEffect(() => {
         correctActionCountRef.current = correctActionCount;
     }, [correctActionCount]);
 
     useEffect(() => {
-        selectClickedRef.current = selectClicked;
-    }, [selectClicked]);
+        isTargetSelectedRef.current = isTargetSelected;
+    }, [isTargetSelected]);
 
-    const getNewStimulusHistory = (stimulus: StimulusFetched | null) => {
-        const newStimulusHistory = stimulus ? [...stimulusHistoryRef.current, stimulus] : stimulusHistoryRef.current;
-        const nStimuli = newStimulusHistory.length;
-        return { newStimulusHistory: newStimulusHistory, nStimuli: nStimuli };
+    useEffect(() => {
+        correctActionRef.current = isActionCorrect;
+    }, [isActionCorrect]);
+
+    useEffect(() => {
+        targetOnRef.current = isTargetVisible;
+    }, [isTargetVisible]);
+
+    const getShownTargets = (stimulus: TargetFetched | null) => {
+        const shownTargetsList = stimulus ? [...shownTargetsRef.current, stimulus] : shownTargetsRef.current;
+        const nShownTargets = shownTargetsList.length;
+        return shownTargetsList;
     }
 
-    function targetMatchNBack(stimulus: StimulusFetched) {
+    function targetMatchNBack(stimulus: TargetFetched) {
         // nback 2 and history 1
         // nback 1 and history 1
         // nback 1 and history 2
-        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
-        if (newStimulusHistory.length > nback) {
-            const res = nStimuli > nback && newStimulusHistory[nStimuli - 1].id === newStimulusHistory[nStimuli - 1 - nback].id;
-            return res;
+        const shownTargetsList = getShownTargets(stimulus);
+        const nShownTargets = shownTargetsList.length;
+        if (shownTargetsList.length > paradigmParameters.nback) {
+            const targetMatches = nShownTargets > paradigmParameters.nback && shownTargetsList[nShownTargets - 1].id === shownTargetsList[nShownTargets - 1 - paradigmParameters.nback].id;
+            return targetMatches;
         } else {
             return false;
         }
     }
 
-    function getRandomStimulus(start: number, stop: number) {
+    const getTargetMatchResultLabel = (stimulus: TargetFetched) => {
+        return (targetMatchNBack(stimulus) ? 'MATCH' : 'NO MATCH');
+    };
+
+    function getRandomTarget(start: number, stop: number) {
         const minInt = Math.ceil(start);
         const maxInt = Math.floor(stop);
         const randomStimulusIdx = Math.floor(Math.random() * (maxInt - minInt + 1) + minInt);
-        const newStimulus = newStimuli[randomStimulusIdx];
-        return newStimulus;
+        const newTarget = fetchedTargetsList[randomStimulusIdx];
+        return newTarget;
     }
 
-    const evaluateAction = (clicked: boolean, stimulus: StimulusFetched | null) => {
-        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(stimulus);
-        const currentStimulus = newStimulusHistory[nStimuli - 1];
+    const evaluateAction = (isTargetSelected: boolean, stimulus: TargetFetched | null) => {
+        const shownTargetsList = getShownTargets(stimulus);
+        const nShownTargets = shownTargetsList.length;
+        const currentStimulus = shownTargetsList[nShownTargets - 1];
 
-        if (clicked) {
-            if (nStimuli > nback) {
-                if (currentStimulus && targetMatchNBack(currentStimulus)) {
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                    setTargetStimulusMatches(prevMatchCount => prevMatchCount + 1);
-                    setCorrectAction(true);
-                }
-            }
+        if (isTargetSelected && ((nShownTargets > paradigmParameters.nback) && (currentStimulus && targetMatchNBack(currentStimulus)))) {
+            console.log('Evaluating click action');
+            return true;
+        } else if ((!isTargetSelected && nShownTargets > 0 && nShownTargets <= paradigmParameters.nback) || (!isTargetSelected && nShownTargets > paradigmParameters.nback && (currentStimulus && !targetMatchNBack(currentStimulus)))) {
+            console.log('None selected. Point, not enough targets or targets do not match');
+            return true;
         } else {
-            console.log('Evaluating no action');
-            if (nStimuli > nback) {
-                if (!targetMatchNBack(currentStimulus)) {
-                    console.log('Point, stimuli do not match');
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                    setCorrectAction(true);
-                } else {
-                    console.log('No point, stimuli do match');
-                }
-            } else {
-                if (nStimuli > 0) {
-                    console.log('Point, not enough stimuli');
-                    setCorrectActionCount(prevCount => prevCount + 1);
-                    setCorrectAction(true);
-                } else {
-                    console.log('No point, no stimuli');
-                }
-            }
+            console.log('None selected. No point, no targets');
+            return false;
         }
+
     }
 
-    function hideStimulus(): void {
-        console.log("hideStimulus");
-        setShowTarget(false);
+    function hideTarget(): void {
+        console.log("hideTarget");
+        setIsTargetVisible(false);
 
-        // evaluate previous action
-        if (selectClickedRef.current) {
-            setSelectClicked(false);
-            console.log('Setting clicked to false');
+        const isActionCorrect = evaluateAction(isTargetSelectedRef.current, null);
+        setIsActionCorrect(isActionCorrect);
+        if (isActionCorrect) {
+            setCorrectActionCount(previousCount => previousCount + 1);
         }
 
-        evaluateAction(selectClickedRef.current, null);
+        const shownTargetsList = getShownTargets(null);
+        const nShownTargets = shownTargetsList.length;
+        const currentStimulus = shownTargetsList[nShownTargets - 1];
 
-        console.log(selectClicked, 'Previous evaluated');
+        const isCorrectActionCount = isActionCorrect ? correctActionCount + 1 : correctActionCount;
+        console.log(isTargetSelectedRef.current, 'Previous evaluated');
+
     }
 
-    function showStimulus(): void {
-        console.log("showStimulus")
-        if (stimulusDuration) {
-            let timer = setTimeout(() => hideStimulus(), stimulusDuration);
-        }
+    function showTarget(duration: number): void {
+        console.log("startShowTargetTimer")
+        setIsTargetSelected(false);
+        setIsTargetVisible(true);
+        let timer = setTimeout(() => hideTarget(), duration);
     }
 
     function clearStimulusTimer() {
@@ -163,119 +178,147 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
         }
     }
 
+    const startTargetTimer = (duration: number) => {
+        const newTarget = getRandomTarget(0, fetchedTargetsList.length - 1);
+        const shownTargetsList = getShownTargets(newTarget);
+        const nShownTargets = shownTargetsList.length;
+        setIsTargetVisible(true);
 
+        setParadigmParameters(params => ({ ...params, isActionCorrect: false }));
 
-    const startStimulusTimer = () => {
-        const newStimulus = getRandomStimulus(0, newStimuli.length - 1);
-        const { newStimulusHistory, nStimuli } = getNewStimulusHistory(newStimulus);
+        showTarget(duration);
+        setShownTargetsList(prevStimuli => ([...prevStimuli, newTarget]));
 
-        setCorrectAction(false);
-
-        setShowTarget(true);
-        showStimulus();
-        setTargetStimulusMatches('NONE SELECTED');
-        setStimulusHistory(prevHistory => [...prevHistory, newStimulus]);
-
-        console.log(newStimulusHistory.length, targetMatchNBack(newStimulus) ? 'MATCH' : 'NO MATCH', newStimulus);
-
+        console.log(shownTargetsList.length, getTargetMatchResultLabel(newTarget), newTarget);
     }
 
-    const startStopStimulusTimer = () => {
-        if (!stimulusTimerOn) {
-            setStimulusTimerOn(!stimulusTimerOn);
-            if (interStimulusInterval) {
-                const timer = setInterval(() => startStimulusTimer(), interStimulusInterval);
-                timerRef.current = Number(timer);
-            }
-        } else {
-            setStimulusTimerOn(!stimulusTimerOn);
+    const startStopParadigm = (duration: number, stimulusInterval: number) => {
+        if (timerRef.current) {
             clearStimulusTimer();
+
+        } else {
+            const timer = setInterval(() => startTargetTimer(duration), stimulusInterval);
+            timerRef.current = Number(timer);
+        }
+
+    }
+
+    function onTargetSelectClicked() {
+        console.log('onTargetSelectClicked');
+        if (isTargetVisible) {
+            setIsTargetSelected(true);
+        } else {
+            console.log('Clicks when target is not visible are ignored');
         }
     }
 
-    function handleClick(selectedStimulus: StimulusFetched) {
-        console.log(!selectedStimulus.selected);
-        setNewStimuli(prevStimuli => {
-            return prevStimuli.map(stimulus => {
-                if (stimulus.id === selectedStimulus.id) {
-                    return { ...stimulus, selected: !selectedStimulus.selected };
-                } else {
-                    return { ...stimulus };
-                }
-            })
-        });
-    }
-
-    function onSelectClick() {
-        if (!selectClicked) {
-            setSelectClicked(true);
-            console.log('Clicked');
-            setTargetStimulusMatches('SELECTED');
+    function getFeedbackLabelBackgroundColor(isActionCorrect: boolean) {
+        if (isActionCorrect) {
+            return 'bg-sky-950';
+        } else {
+            return 'bg-rose-950';
         }
     }
 
+    function getActionFeedbackLabelBackground(isTargetVisible: boolean, isActionCorrect: boolean) {
+        if (!isTargetVisible) {
+            return getFeedbackLabelBackgroundColor(isActionCorrect);
+        } else {
+            return 'bg-black-500/0';
+        }
+    }
+
+    const ActionLabel = ({ isTargetSelected }: { isTargetSelected: boolean }) => {
+        if (isTargetSelected) {
+            return 'SELECTED';
+        } else {
+            return 'NONE SELECTED';
+        }
+    }
+
+    function showHideTarget(showTarget: boolean) {
+        if (showTarget) {
+            return '';
+        } else {
+            return 'hidden';
+        }
+    }
+
+    const TargetComponentLabel = ({ targets }: { targets: TargetFetched[] }) => {
+        if (targets.length > 0) {
+            return targets[targets.length - 1].label;
+        } else {
+            return '';
+        }
+    }
+
+    function getStartStopButton(selectedNback: number, buttonNback: number) {
+        if (timerRef.current && selectedNback === buttonNback) {
+            return " Stop";
+        } else if (!timerRef.current && selectedNback === buttonNback) {
+            return " Start";
+        } else {
+            return '';
+        }
+    }
+
+
+
+    const ActionShownTargetsStats = ({ correctActionCount, shownTargetsCount }: { correctActionCount: number, shownTargetsCount: number }) => {
+        return (
+            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 rounded">
+                <p>{correctActionCount}|({shownTargetsCount})</p>
+            </div>
+        );
+    };
 
     return (
-        <>
+        <div className="flex flex-col space-y-4 h-full items-center">
             <div className="min-h-8 flex z-10 max-w-2xl items-center justify-center font-mono text-xl border-0 border-slate-500 p-1 rounded gap-1">
                 {
-                    newStimuli.map((stimulus) => (
-                        <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={handleClick} />
+                    fetchedTargetsList.map((stimulus) => (
+                        <StimulusLabel key={`${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
                     ))
                 }
             </div>
-            <div className="min-h-8 z-10 grid grid-cols-10 place-items-center gap-1 max-w-2xl content-normal font-mono text-xs border-0 border-slate-500 p-1 rounded">
-                {
-                    stimulusHistory.slice(-10).map((stimulus, idx) => (
-                        <StimulusLabel key={`${idx}_${stimulus.id}`} stimulus={stimulus} onClick={() => ""} />
-                    ))
-                }
-            </div>
+            <StimulusHistory history={shownTargetsList} />
             <div className='max-w-2xl h-full w-full flex-col items-center p-0 border border-slate-500 rounded'>
-                <div className={`flex border-0 items-center justify-center rounded ${showTarget ? '' : correctAction ? 'bg-sky-950' : 'bg-rose-950'}`}>
+                <div className={`flex border-0 items-center justify-center rounded ${getActionFeedbackLabelBackground(isTargetVisible, isActionCorrect)}`}>
                     <p className={`text-xs border-0`}>
-                        {targetStimulusMatches}
+                        <ActionLabel isTargetSelected={isTargetSelected} />
                     </p>
                 </div>
                 <div className='flex min-h-14 relative w-full h-full justify-center items-center'>
                     <div>{children}</div>
                     <div className='absolute top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border-0 rounded border-sky-500'>
-                        <p
-                            className={`text-4xl ${showTarget ? "" : "hidden"}`}
-                        >
-                            {stimulusHistory.length > 0 ? stimulusHistory[stimulusHistory.length - 1].label : ''}
+                        <p className={`text-4xl ${showHideTarget(isTargetVisible)}`} >
+                            <TargetComponentLabel targets={shownTargetsList} />
                         </p>
                     </div>
                 </div>
             </div>
             <div className="z-10 w-full max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-1 rounded">
                 <button
-                    className={`w-full max-w-2xl justify-self-center items-center border border-slate-500 p-3 rounded bg-black-500/0 focus:ring ${!showTarget ? '' : 'hover:bg-slate-800 active:bg-slate-900'}`}
-                    onClick={() => onSelectClick()}>
+                    className={`w-full max-w-2xl justify-self-center items-center border border-slate-500 p-3 rounded bg-black-500/0 focus:ring ${!paradigmParameters.isTargetVisible ? '' : 'hover:bg-slate-800 active:bg-slate-900'}`}
+                    onClick={() => onTargetSelectClicked()}>
                     Select
                 </button>
             </div>
-            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-1 rounded">
-                <p>{correctActionCount}|({stimulusHistoryRef.current.length})</p>
-            </div>
-            <div className="z-10 max-w-2xl justify-self-center items-center font-mono border-slate-500 border-0 lg:flex space-x-4 pt-2 pb-2 rounded">
-                <button
-                    className="border border-slate-500 p-3 bg-black-500/0 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring"
-                    onClick={() => startStopStimulusTimer()}>
-                    {stimulusTimerOn ? "Stop" : "Start"}
-                </button>
-            </div>
-            <div className="z-10 max-w-2xl justify-center font-mono border-slate-500 border-0 lg:flex space-x-4 p-0 rounded">
+            <ActionShownTargetsStats correctActionCount={correctActionCount} shownTargetsCount={shownTargetsList.length} />
+            <div className={`flex z-10 max-w-2xl full-h items-center justify-self-center font-mono border-slate-500 border-0 lg:flex p-0 rounded ${timerRef.current ? 'space-x-0' : 'space-x-4'}`}>
                 {[1, 2, 3, 4].map(nbackValue => (
                     <button
                         key={nbackValue}
-                        className={`text-xs border border-slate-500 p-1 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'}`}
-                        onClick={() => setNback(nbackValue)}>
-                        {nbackValue}-Back
+                        className={`p-1 text-xs border border-slate-500 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${paradigmParameters.nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'} ${(paradigmParameters.nback !== nbackValue && timerRef.current) ? 'hidden' : ''}`}
+                        onClick={() => {
+                            setParadigmParameters(params => ({ ...params, nback: nbackValue }));
+                            paradigmParameters.nback === nbackValue ? startStopParadigm(stimulusDuration, interStimulusInterval) : null;
+                        }}>
+                        {nbackValue}-Back {getStartStopButton(paradigmParameters.nback, nbackValue)}
                     </button>
                 ))}
             </div>
-        </>
+        </div>
 
     );
 }
