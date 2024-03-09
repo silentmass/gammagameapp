@@ -302,8 +302,8 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                         key={nbackValue}
                         className={`p-1 text-xs border border-slate-500 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring ${nback === nbackValue ? 'bg-slate-700' : 'bg-slate-500/0'} ${(nback !== nbackValue && timerRef.current) ? 'hidden' : ''}`}
                         onClick={() => {
-                            setNback(nbackValue);
-                            nback === nbackValue ? startStopParadigm(stimulusDuration, interStimulusInterval) : () => { };
+                            (nbackValue) ? setNback(nbackValue) : () => { };
+                            (nback === nbackValue && stimulusDuration && interStimulusInterval) ? startStopParadigm(stimulusDuration, interStimulusInterval) : () => { };
                         }}>
                         {nbackValue}-Back {getStartStopButton(nback, nbackValue)}
                     </button>
