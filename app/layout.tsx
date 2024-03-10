@@ -18,11 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-500`}>
-        <main className="flex min-h-screen flex-col items-center justify-between p-0 m-0">
-          <div className="flex flex-col border max-w-2xl h-full">
+        <main className="flex flex-col min-h-screen min-w-screen w-full items-center justify-center gap-y-10">
+          <div className="flex flex-min-h-screen flex-col max-w-2xl items-center justify-center">
             {children}
           </div>
-          <div className="flex max-w-2xl items-center justify-center flex-wrap">
+          <div className="flex max-w-xl items-center justify-center flex-wrap gap-3 p-3">
             <NavLinks />
           </div>
         </main >

@@ -2,14 +2,15 @@
 
 import ConcentricCircles from '@/app/ui/concentric-circles';
 import Nback from "@/app/ui/nback";
+import CanvasWrapper from '@/app/ui/canvasWrapper';
 
 export default function Page() {
 
     return (
-        <div className="flex min-h-screen flex-col justify-center items-center p-0">
+        <CanvasWrapper>
             <Nback stimulusDuration={null} interStimulusInterval={null} forcedChoice={null}>
                 <ConcentricCircles />
             </Nback>
-        </div>
+        </CanvasWrapper >
     );
 }

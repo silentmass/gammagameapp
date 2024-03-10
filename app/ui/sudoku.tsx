@@ -188,13 +188,14 @@ export default function Sudoku() {
     }
 
     const buttonClassName = `p-1 text-xs border border-slate-500 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring bg-slate-500/0`;
+    const gridCols = cellMatrixShape.m === 4 ? 'grid-cols-4' : '';
 
     return (
-        <div className="flex flex-col gap-y-6 p-3 min-w-full">
-            <div className={`grid ${'grid-cols-' + cellMatrixShape.m} gap-3`}>
+        <div className="flex flex-col gap-y-6 p-3">
+            <div className={`${gridCols} grid gap-3 bg-sky-500 ${gridCols}`}>
                 {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
-                    <div key={e2} className={`flex size-16 p-3 w-full justify-center items-center border rounded ${getCellBackgroundColor(e2, neighbourCellIndices)}`}>
-                        <p className="text-xl text-center">{cellValues[e2] ? cellValues[e2] : ''}</p>
+                    <div key={e2} className={`size-16 p-3 justify-center items-center border rounded ${getCellBackgroundColor(e2, neighbourCellIndices)}`}>
+                        <p className="text-xl text-center bg-sky-500">{cellValues[e2] ? cellValues[e2] : ''}</p>
                     </div>
                 ))
                 ))}

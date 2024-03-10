@@ -1,12 +1,13 @@
 import Nback from '@/app/ui/nback';
+import CanvasWrapper from '@/app/ui/canvasWrapper';
 
 export default function Page() {
 
     return (
-        <div className="flex min-h-screen flex-col items-center p-0">
+        <CanvasWrapper>
             <Nback stimulusDuration={400} interStimulusInterval={1600} forcedChoice={null} >
                 <></>
             </Nback>
-        </div>
+        </CanvasWrapper>
     );
 }

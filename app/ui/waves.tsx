@@ -77,7 +77,8 @@ export default function Waves() {
 
                         // Fill the array with RGBA values
                         for (let i = 0; i < imageData.data.length; i += 4) {
-                            if (imageData) {
+                            const distanceFromCenter = pixelDistanceFromOrigin(i, canvasSide, centerX, centerY);
+                            if (imageData && distanceFromCenter < canvasSide / 2) {
                                 // imageData.data[i + 0] = 255;
                                 // imageData.data[i + 1] = 255;
                                 // imageData.data[i + 2] = 255;

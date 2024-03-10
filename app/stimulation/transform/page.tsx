@@ -1,10 +1,11 @@
 'use client'
 import Transform from "@/app/ui/transform";
+import CanvasWrapper from "@/app/ui/canvasWrapper";
 
 export default function Page() {
     return (
-        <div className='flex h-full flex-col justify-center items-center p-0 border border-rose-500 rounded'>
+        <CanvasWrapper>
             <Transform />
-        </div>
+        </CanvasWrapper>
     );
 }
