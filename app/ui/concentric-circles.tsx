@@ -71,9 +71,9 @@ export default function ConcentricCircles() {
                                             / 2
                                         )
                                     );
-                                    imageData.data[i + 0] = colorWeight;
-                                    imageData.data[i + 1] = colorWeight;
-                                    imageData.data[i + 2] = colorWeight;
+                                    imageData.data[i + 0] = colorWeight < 255 / 2 ? 0 : 255;
+                                    imageData.data[i + 1] = colorWeight < 255 / 2 ? 0 : 255;
+                                    imageData.data[i + 2] = colorWeight < 255 / 2 ? 0 : 255;
                                     imageData.data[i + 3] = 255;
                                 }
 
