@@ -1,5 +1,13 @@
 import { useRef, useEffect } from 'react';
 
+export const pixelDistanceFromOrigin = (i: number, canvasSideWidth: number, canvasCenterX: number, canvasCenterY: number) => {
+    return Math.sqrt(Math.pow(((i % (4 * canvasSideWidth) / (4 * canvasSideWidth)) * canvasSideWidth - canvasCenterX), 2) + Math.pow(((Math.ceil(i / (4 * canvasSideWidth)) / canvasSideWidth) * canvasSideWidth - canvasCenterY), 2));
+}
+
+export const opacityInitialPhase = (currentTime: number, animatedCyclesPerSecond: number) => {
+    return (currentTime / 1000) * 2 * Math.PI * animatedCyclesPerSecond;
+}
+
 export default function Waves() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -15,9 +23,7 @@ export default function Waves() {
     const animatedCyclesPerRadius = 2;
     const animatedCyclesPerSecond = 0.5;
 
-    const opacityInitialPhase = (currentTime: number) => {
-        return (currentTime / 1000) * 2 * Math.PI * animatedCyclesPerSecond;
-    }
+
 
     useEffect(() => {
         const mainCanvas = canvasRef.current;
@@ -26,10 +32,6 @@ export default function Waves() {
         if (mainCanvas) {
             const centerX = mainCanvas.width / 2;
             const centerY = mainCanvas.height / 2;
-
-            const pixelDistanceFromOrigin = (i: number) => {
-                return Math.sqrt(Math.pow(((i % (4 * canvasSide) / (4 * canvasSide)) * canvasSide - centerX), 2) + Math.pow(((Math.ceil(i / (4 * canvasSide)) / canvasSide) * canvasSide - centerY), 2));
-            }
 
             offscreenCanvas.width = mainCanvas.width;
             offscreenCanvas.height = mainCanvas.height;
@@ -79,7 +81,15 @@ export default function Waves() {
                                 // imageData.data[i + 0] = 255;
                                 // imageData.data[i + 1] = 255;
                                 // imageData.data[i + 2] = 255;
-                                imageData.data[i + 3] = Math.floor(255 * (1 + Math.sin(opacityInitialPhase(currentTime) + (pixelDistanceFromOrigin(i) / (canvasSide / 2) * 2 * Math.PI * animatedCyclesPerRadius))) / 2);
+                                imageData.data[i + 3] = (
+                                    Math.floor(
+                                        255
+                                        * (1 + Math.sin(
+                                            opacityInitialPhase(currentTime, animatedCyclesPerSecond) + (pixelDistanceFromOrigin(i, canvasSide, centerX, centerY) / (canvasSide / 2) * 2 * Math.PI * animatedCyclesPerRadius)
+                                        ))
+                                        / 2
+                                    )
+                                );
                             }
                         }
                         mainCtx.putImageData(imageData, 0, 0);

@@ -1,67 +1,107 @@
 import { useRef, useEffect } from 'react';
+import { pixelDistanceFromOrigin, opacityInitialPhase } from '@/app/ui/waves';
 
 export default function ConcentricCircles() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+    const canvasSide = 350;
+
+    const animatedCyclesPerRadius = 10;
+    const animatedCyclesPerSecond = 0.5;
+
+    const radiusIncrement = 17;
+    let radius = 0;
+    const numberOfCircles = 20;
+    const maxRadius = radiusIncrement * numberOfCircles;
+    let animationFrameId: number;
+
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
+        const mainCanvas = canvasRef.current;
+        const offscreenCanvas = document.createElement("canvas");
 
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radiusIncrement = 17;
-            let radius = 0;
-            const numberOfCircles = 20;
-            const maxRadius = radiusIncrement * numberOfCircles;
-            let animationFrameId: number;
-            let radiusStep = -0.2;
+        if (mainCanvas) {
+            const centerX = mainCanvas.width / 2;
+            const centerY = mainCanvas.height / 2;
 
-            let currentRadius = 0;
+            offscreenCanvas.width = mainCanvas.width;
+            offscreenCanvas.height = mainCanvas.height;
 
-            const step = () => {
-                if (ctx) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+            const mainCtx = mainCanvas.getContext('2d', { willReadFrequently: true });
 
-                    // Draw mask
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 200, 0, Math.PI * 2);
-                    ctx.clip()
+            if (offscreenCtx) {
+                offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                offscreenCtx.beginPath();
+                offscreenCtx.arc(centerX, centerY, canvasSide / 2, 0, Math.PI * 2);
+                offscreenCtx.fillStyle = 'black';
+                offscreenCtx.fill();
 
-                    for (let i = 0; i < numberOfCircles; i++) {
-                        ctx.beginPath();
-                        currentRadius = radiusIncrement * (i + 1) + radius;
-                        if (currentRadius < 0) {
-                            currentRadius = radiusIncrement * numberOfCircles + currentRadius;
+                const imageData = offscreenCtx.getImageData(0, 0, canvasSide, canvasSide);
+
+                if (mainCtx) {
+
+                }
+
+                const step = () => {
+                    if (mainCtx) {
+                        let currentTime = Date.now();
+
+                        mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+
+                        mainCtx.drawImage(offscreenCanvas, 0, 0);
+
+                        // Draw mask
+                        mainCtx.beginPath();
+                        mainCtx.arc(centerX, centerY, 200, 0, Math.PI * 2);
+                        mainCtx.clip()
+
+
+                        // Fill the array with RGBA values
+                        for (let i = 0; i < imageData.data.length; i += 4) {
+                            if (imageData) {
+
+                                const distanceFromOrigin = pixelDistanceFromOrigin(i, canvasSide, centerX, centerY);
+                                if (distanceFromOrigin < canvasSide / 2) {
+                                    const colorWeight = (
+                                        Math.floor(
+                                            255
+                                            * (1 + Math.sin(
+                                                opacityInitialPhase(currentTime, animatedCyclesPerSecond) + (pixelDistanceFromOrigin(i, canvasSide, centerX, centerY) / (canvasSide / 2) * 2 * Math.PI * animatedCyclesPerRadius)
+                                            ))
+                                            / 2
+                                        )
+                                    );
+                                    imageData.data[i + 0] = colorWeight;
+                                    imageData.data[i + 1] = colorWeight;
+                                    imageData.data[i + 2] = colorWeight;
+                                    imageData.data[i + 3] = 255;
+                                }
+
+                            }
                         }
-                        ctx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI, false);
-                        ctx.strokeStyle = "white";
-                        ctx.lineWidth = radiusIncrement / 2;
-                        ctx.stroke();
-                    }
+                        mainCtx.putImageData(imageData, 0, 0);
 
-                    radius += radiusStep;
 
-                    if (radius > -maxRadius) {
-                        animationFrameId = window.requestAnimationFrame(step);
-                    } else {
-                        radius = radius + maxRadius - radiusIncrement / 2;
-                        animationFrameId = window.requestAnimationFrame(step);
+                        animationFrameId = window.requestAnimationFrame(step)
                     }
                 }
+
+                step();
+
+                return () => {
+                    window.cancelAnimationFrame(animationFrameId);
+                };
             }
 
-            step();
 
-            return () => {
-                window.cancelAnimationFrame(animationFrameId);
-            };
+
+
         }
 
 
     }, []);
 
     return (
-        <canvas className='' ref={canvasRef} width="400" height="400" />
+        <canvas className='' ref={canvasRef} width={canvasSide} height={canvasSide} />
     );
 }

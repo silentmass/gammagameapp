@@ -68,5 +68,5 @@ export default function Transform() {
 
     }, []);
 
-    return (<canvas ref={canvasRef} width="400" height="400" />);
+    return (<canvas ref={canvasRef} width="375" height="375" />);
 }
