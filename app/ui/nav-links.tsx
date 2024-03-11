@@ -16,6 +16,7 @@ const links = [
     { name: 'Flickering light', href: '/stimulation/flickering-light' },
     { name: 'Transform', href: '/stimulation/transform' },
     { name: 'Waves', href: '/stimulation/waves' },
+    { name: 'Sudoku', href: '/sudoku' },
 ];
 
 export default function NavLinks() {

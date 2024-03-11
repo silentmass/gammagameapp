@@ -1,8 +1,11 @@
 'use client'
 import Sudoku from "@/app/ui/sudoku";
+import CanvasWrapper from "@/app/ui/canvasWrapper";
 
 export default function Page() {
     return (
-        <Sudoku />
+        <CanvasWrapper>
+            <Sudoku />
+        </CanvasWrapper>
     );
 }

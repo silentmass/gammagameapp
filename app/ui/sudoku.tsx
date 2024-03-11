@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 
+
 export default function Sudoku() {
+    const sudokuNumbersList = [1, 2, 3, 4];
+
+    const cellMatrixShape = { m: 4, n: 4 };
+    const cellMatrixIndices: number[][] = [];
+
     const [cellIndex, setCellIndex] = useState(0);
+    const [isVisibleNumPad, setIsVisibleNumPad] = useState(false);
+    const [isVisibleSolution, setIsVisibleSolution] = useState(false);
+    const [numPadPosition, setNumPadPosition] = useState({ x: 0, y: 0 });
+    const [numPadCellIndex, setNumPadCellIndex] = useState(0);
+
     const [neighbourCellIndices, setNeighbourCellIndices] = useState<(number | null)[]>([]);
     const [cellValues, setCellValues] = useState<{ [key: number]: number | null }>({
         0: 2,
@@ -14,17 +25,47 @@ export default function Sudoku() {
         7: null,
         8: null,
     });
+    const dummyCellMatrix = new Array<number>(cellMatrixShape.m).fill(0).map(item => new Array(cellMatrixShape.n).fill(0));
 
+    const [boardValues, setBoardValues] = useState<number[][]>(dummyCellMatrix);
+    const [userInputBoardValues, setUserInputBoardValues] = useState<number[]>(dummyCellMatrix.flat());
+
+    const cellIndexRef = useRef<number>(cellIndex);
     const cellValuesRef = useRef<{ [key: number]: number | null }>(cellValues);
+    const boardValuesRef = useRef<number[][]>(dummyCellMatrix);
+    const userInputBoardValuesRef = useRef<number[]>(dummyCellMatrix.flat());
+
+    useEffect(() => {
+        cellIndexRef.current = cellIndex;
+    }, [cellIndex])
 
     useEffect(() => {
         cellValuesRef.current = cellValues;
     }, [cellValues])
 
-    const sudokuNumbersList = [1, 2, 3, 4];
+    useEffect(() => {
+        boardValuesRef.current = boardValues;
+    }, [boardValues])
 
-    const cellMatrixShape = { m: 4, n: 4 };
-    const cellMatrixIndices: number[][] = [];
+    useEffect(() => {
+        userInputBoardValuesRef.current = userInputBoardValues;
+    }, [userInputBoardValues])
+
+    // useEffect(() => {
+    //     if (typeof window !== 'undefined') {
+    //         window.addEventListener('mouseup', (event) => {
+    //             event.stopPropagation();
+    //             console.log('Mouse up detected', event);
+    //             setIsVisibleNumPad(false);
+    //         });
+
+    //     }
+    //     return () => window.removeEventListener('mouseup', () => { });
+
+    // }, [])
+
+
+
 
     for (let i = 0; i < cellMatrixShape.m; i++) {
         cellMatrixIndices[i] = [];
@@ -38,8 +79,8 @@ export default function Sudoku() {
         n: number
     };
 
-    function isValidCellValue(cellMatrix: (number | null)[][], row: number, col: number, cellValue: number | null) {
-        // Check global matrix
+    function isValidCellValue(cellMatrix: (number | null)[][], row: number, col: number, cellValue: number | null): boolean {
+        // Check global rows and cols
 
         for (let x = 0; x < cellMatrix.length; x++) {
             if (cellMatrix[row][x] === cellValue || cellMatrix[x][col] === cellValue) {
@@ -55,11 +96,55 @@ export default function Sudoku() {
 
         for (let i = 0; i < subMatrixSideLength; i++) {
             for (let j = 0; j < subMatrixSideLength; j++) {
-                if (cellMatrix[i + startRow][j + startCol] == cellValue) {
+                if (cellMatrix[i + startRow][j + startCol] === cellValue) {
                     return false;
                 }
             }
         }
+        return true;
+    }
+
+    function solveSudoku(cellMatrix: (number | null)[][]): boolean {
+        const possibleCellValues = Array.from({ length: cellMatrix.length }, (_, i) => i + 1);
+        const randomCellValues = new Array<number>(cellMatrix.length).fill(0);
+        for (let k = 0; k < randomCellValues.length; k++) {
+            // [1, 2, 3, 4] | [0, 0, 0, 0]
+            // [2, 3, 4] | [1, 0, 0, 0]
+            // [2, 3] | [1, 4, 0, 0]
+            const availableCellValuesList = possibleCellValues.filter(item => !randomCellValues.includes(item));
+            const newCellValue = availableCellValuesList[Math.floor(Math.random() * availableCellValuesList.length)];
+            randomCellValues[k] = newCellValue;
+        }
+
+        for (let row = 0; row < cellMatrix.length; row++) {
+            for (let col = 0; col < cellMatrix.length; col++) {
+                if (cellMatrix[row][col] === 0) {
+                    for (let cellValueIndex = 0; cellValueIndex < cellMatrix.length; cellValueIndex++) {
+                        const cellValue = randomCellValues[cellValueIndex];
+                        // console.log(cellValue, cellValueIndex, randomCellValues)
+                        if (isValidCellValue(cellMatrix, row, col, cellValue)) {
+                            cellMatrix[row][col] = cellValue;
+                            if (solveSudoku(cellMatrix)) {
+                                return true;
+                            } else {
+                                cellMatrix[row][col] = 0;
+                            }
+                        }
+                    }
+                    return false
+                }
+            }
+
+        }
+        return true;
+    }
+
+    function generateSudoku() {
+        const size = cellMatrixIndices.length;
+        let board = cellMatrixIndices.map(item => Array(item.length).fill(0));
+        solveSudoku(board)
+        setBoardValues(board);
+        return board;
     }
 
     function getCellMatrixElement(cellMatrix: number[][], m: number, n: number): number | null {
@@ -187,29 +272,134 @@ export default function Sudoku() {
         console.log(cellValues);
     }
 
+    function reshapeArray(flatArray: number[], elementsPerSubArray: number) {
+        let reshapedArray = [];
+        for (let i = 0; i < flatArray.length; i += elementsPerSubArray) {
+            reshapedArray.push(flatArray.slice(i, i + elementsPerSubArray));
+        }
+        return reshapedArray;
+    }
+
+    function checkUserInputValues(cellMatrix: number[][]) {
+        for (let row = 0; row < cellMatrix.length; row++) {
+            for (let col = 0; col < cellMatrix.length; col++) {
+                const cellValue = cellMatrix[row][col];
+                if (cellValue === 0) {
+                    return false;
+                } else if (!isValidCellValue(cellMatrix, row, col, cellValue)) {
+                    console.log(cellValue);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     const buttonClassName = `p-1 text-xs border border-slate-500 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring bg-slate-500/0`;
     const gridCols = cellMatrixShape.m === 4 ? 'grid-cols-4' : '';
+    const activeCellStyle = (activeCellIndex: number) => {
+        if (activeCellIndex === cellIndex) {
+            return 'border-sky-500 border-2';
+        } else {
+            return 'border';
+        }
+    };
+    const activeNumPadCellStyle = (activeCellIndex: number) => {
+        if (activeCellIndex === numPadCellIndex) {
+            return 'border-sky-500 border-2 bg-slate-700';
+        } else {
+            return 'border';
+        }
+    };
+
+    const numPadPlacement = isVisibleNumPad ? `` : 'hidden';
+    // const numPadPlacement = isVisibleNumPad ? `absolute left-${numPadPosition.x.toString()} top-${numPadPosition.y.toString()}` : 'hidden';
+    const gridNaviVisible = isVisibleNumPad ? 'hidden' : '';
 
     return (
-        <div className="flex flex-col gap-y-6 p-3">
-            <div className={`${gridCols} grid gap-3 bg-sky-500 ${gridCols}`}>
+        <div className="flex flex-col gap-y-6 p-3 justify-center items-center ">
+            <div className={`grid gap-3 ${gridCols}`}>
                 {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
-                    <div key={e2} className={`size-16 p-3 justify-center items-center border rounded ${getCellBackgroundColor(e2, neighbourCellIndices)}`}>
-                        <p className="text-xl text-center bg-sky-500">{cellValues[e2] ? cellValues[e2] : ''}</p>
+                    <div key={e2} className={`flex flex-col size-16 p-0 justify-center items-center border rounded ${isVisibleSolution && userInputBoardValues[Number(e2)] === boardValues.flat()[Number(e2)] ? 'bg-slate-700' : ''} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
+                        <div className="flex justify-center items-center w-full h-full text-xl"><p>{userInputBoardValues[e2] !== 0 ? userInputBoardValues[e2] : ''}</p></div>
+                        <div className={`flex pr-1 pb-1 justify-end items-end w-full text-sm ${isVisibleSolution ? '' : 'hidden'}`}><p className="p-0">{boardValues[i1][i2] !== 0 ? boardValues[i1][i2] : ''}</p></div>
                     </div>
                 ))
                 ))}
             </div>
-            <div className="flex gap-x-3 justify-center items-center">
+
+            <div className="min-h-2xl border">
+                <div className={`grid gap-0 ${gridCols} ${gridNaviVisible}`}>
+                    {cellMatrixIndices.flat().map((e, i) => (
+                        <div
+                            className={`flex size-12 border ${activeCellStyle(i)}`}
+                            key={i}
+                            onMouseEnter={() => {
+                                setCellIndex(i);
+                                console.log(i);
+                            }}
+                            onMouseDown={(e) => {
+                                console.log(i, 'MouseDown');
+                                setIsVisibleNumPad(true);
+                                // setNumPadPosition({ x: e.clientX, y: e.clientY });
+                            }}
+                            onMouseUp={() => {
+                                console.log(i, 'MouseUp');
+                                // setIsVisibleNumPad(false);
+                            }}
+                        >{ }</div>
+                    ))}
+                </div>
+                <div
+                    className={`grid gap-0 grid-cols-2 ${numPadPlacement}`}
+                    onMouseLeave={() => {
+                        console.log('onMouseLeave');
+                        setIsVisibleNumPad(false);
+                    }}
+                >
+                    {[1, 2, 3, 4, 0].map((cellValue, i) => (
+                        <div
+                            className={`flex min-w-24 min-h-24 justify-center items-center text-xl select-none ${Number(cellValue) === 0 ? 'col-span-2' : ''} ${activeNumPadCellStyle(cellValue)}`}
+                            key={i}
+                            onMouseOver={() => {
+                                console.log(cellValue, 'MouseOver');
+                                setNumPadCellIndex(cellValue);
+                            }}
+                            onTouchStart={() => {
+                                console.log(cellValue, 'MouseOver');
+                                setNumPadCellIndex(cellValue);
+                            }}
+                            onMouseUp={() => {
+                                console.log('setNumPadCellIndex: ', cellValue, 'onMouseUp', 'cellIndex: ', cellIndex);
+                                const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
+                                setUserInputBoardValues(newUserInputBoardValues);
+                                console.log(newUserInputBoardValues);
+                                setIsVisibleNumPad(false);
+                            }}
+                            onTouchEnd={() => {
+                                console.log('setNumPadCellIndex: ', cellValue, 'onMouseUp', 'cellIndex: ', cellIndex);
+                                const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
+                                setUserInputBoardValues(newUserInputBoardValues);
+                                console.log(newUserInputBoardValues);
+                                setIsVisibleNumPad(false);
+                            }}
+                        >
+                            <p className="text-center">{cellValue}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="flex gap-x-24 justify-between pt-10">
+                <button className={buttonClassName}
+                    onClick={() => console.log(generateSudoku())} >Generate sudoku</button>
                 <button className={buttonClassName}
                     onClick={() => {
-                        logNeighbourCellIndices(cellIndex, cellMatrixShape);
-                    }}>Get neighbours</button>
+                        const reshapedNewArray = reshapeArray(userInputBoardValues, cellMatrixShape.m);
+                        console.log(reshapedNewArray, checkUserInputValues(reshapedNewArray));
+                    }} >Check user solution</button>
                 <button className={buttonClassName}
-                    onClick={() => setCellIndex(prevIndex => prevIndex + 1)}>Increase cell index ({cellIndex})</button>
-                <button className={buttonClassName}
-                    onClick={() => initCellNumbers()} >Init numbers</button>
+                    onClick={() => setIsVisibleSolution(previousState => !previousState)} >{isVisibleSolution ? 'Hide computer solution' : 'Show computer solution'}</button>
             </div>
-        </div>
+        </div >
     );
 }
