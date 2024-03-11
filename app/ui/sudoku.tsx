@@ -366,16 +366,18 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
     return (
         <div id="big" className="flex flex-col gap-y-6 p-3 justify-center items-center " draggable="false">
             <div className="flex relative ">
-                <div className="flex border border-slate-500">{children}</div>
-                <div className="absolute justify-start h-full w-full top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2 border border-rose-500">
-                    <div className={`grid ${gridCols} border border-sky-500 justify-center items-center w-full h-full`}>
-                        {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
-                            <div key={e2} className={`flex flex-col size-16 p-0 justify-center items-center border rounded ${solutionBoardValueBackground(e2)} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
-                                <div className="flex justify-center items-center w-full h-full text-xl"><p>{userInputBoardValues[e2] !== 0 ? userInputBoardValues[e2] : ''}</p></div>
-                                <div className={`flex pr-1 pb-1 justify-end items-end w-full text-sm ${isVisibleSolution ? '' : 'hidden'}`}><p className="p-0">{boardValue(i1, i2)}</p></div>
-                            </div>
-                        ))
-                        ))}
+                <div id='stimulus' className="">{children}</div>
+                <div id='sudoku' className="absolute w-full top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2">
+                    <div className="flex border-0 justify-center p-3">
+                        <div className={`grid ${gridCols} gap-3`}>
+                            {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
+                                <div key={e2} className={`flex size-16 border rounded p-0 justify-center items-center  ${solutionBoardValueBackground(e2)} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
+                                    <div className="flex justify-center items-center w-full h-full text-xl"><p>{userInputBoardValues[e2] !== 0 ? userInputBoardValues[e2] : ''}</p></div>
+                                    <div className={`flex pr-1 pb-1 justify-end items-end w-full text-sm ${isVisibleSolution ? '' : 'hidden'}`}><p className="p-0">{boardValue(i1, i2)}</p></div>
+                                </div>
+                            ))
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
