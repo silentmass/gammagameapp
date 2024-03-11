@@ -390,6 +390,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                 onTouchMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const touches = e.touches[0];
+                    e.preventDefault();
                     if (isVisibleNumPad) {
                         // Numpad
                         if ((touches.clientX < rect.left || touches.clientX > rect.right) || (touches.clientY < rect.top || touches.clientY > rect.bottom)) {
@@ -452,6 +453,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
 
                             onTouchStart={(e) => {
                                 console.log('onTouchStart key');
+                                e.preventDefault();
                                 if (cellIndex === i) {
                                     console.log('Same key');
                                     setIsVisibleNumPad(true);
