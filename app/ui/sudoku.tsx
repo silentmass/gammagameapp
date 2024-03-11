@@ -10,8 +10,10 @@ export default function Sudoku() {
     const [cellIndex, setCellIndex] = useState(0);
     const [isVisibleNumPad, setIsVisibleNumPad] = useState(false);
     const [isVisibleSolution, setIsVisibleSolution] = useState(false);
+
     const [numPadPosition, setNumPadPosition] = useState({ x: 0, y: 0 });
     const [numPadCellIndex, setNumPadCellIndex] = useState(0);
+    const [isDraggableNumPad, setIsDraggableNumPad] = useState(false);
 
     const [neighbourCellIndices, setNeighbourCellIndices] = useState<(number | null)[]>([]);
     const [cellValues, setCellValues] = useState<{ [key: number]: number | null }>({
@@ -27,12 +29,12 @@ export default function Sudoku() {
     });
     const dummyCellMatrix = new Array<number>(cellMatrixShape.m).fill(0).map(item => new Array(cellMatrixShape.n).fill(0));
 
-    const [boardValues, setBoardValues] = useState<number[][]>(dummyCellMatrix);
+    const [boardValues, setBoardValues] = useState<number[][] | null>(null);
     const [userInputBoardValues, setUserInputBoardValues] = useState<number[]>(dummyCellMatrix.flat());
 
     const cellIndexRef = useRef<number>(cellIndex);
     const cellValuesRef = useRef<{ [key: number]: number | null }>(cellValues);
-    const boardValuesRef = useRef<number[][]>(dummyCellMatrix);
+    const boardValuesRef = useRef<number[][] | null>(null);
     const userInputBoardValuesRef = useRef<number[]>(dummyCellMatrix.flat());
 
     useEffect(() => {
@@ -144,6 +146,7 @@ export default function Sudoku() {
         let board = cellMatrixIndices.map(item => Array(item.length).fill(0));
         solveSudoku(board)
         setBoardValues(board);
+        setUserInputBoardValues(dummyCellMatrix.flat());
         return board;
     }
 
@@ -295,6 +298,34 @@ export default function Sudoku() {
         return true;
     }
 
+    function getNumPadValueByRelativePosition(relativeX: number, relativeY: number) {
+        if (relativeY < 0.33) {
+            if (relativeX < 0.5) {
+                return 1;
+            } else {
+                return 2;
+            }
+        } else if (relativeY >= 0.33 && relativeY < 0.66) {
+            if (relativeX < 0.5) {
+                return 3;
+            } else {
+                return 4;
+            }
+        } else {
+            return 0;
+        }
+
+    }
+    function getTouchPadValueByRelativePosition(relativeX: number, relativeY: number) {
+        // 
+        const col = Math.floor(relativeX * 4);
+        const row = Math.floor(relativeY * 4);
+        console.log(row, col, row * 4 + col)
+        // row 0 col 0 = 0
+        // row 1 col 1 = 5
+        return (row * 4 + col);
+    }
+
     const buttonClassName = `p-1 text-xs border border-slate-500 rounded hover:bg-slate-500 active:bg-slate-700 focus:ring bg-slate-500/0`;
     const gridCols = cellMatrixShape.m === 4 ? 'grid-cols-4' : '';
     const activeCellStyle = (activeCellIndex: number) => {
@@ -316,37 +347,115 @@ export default function Sudoku() {
     // const numPadPlacement = isVisibleNumPad ? `absolute left-${numPadPosition.x.toString()} top-${numPadPosition.y.toString()}` : 'hidden';
     const gridNaviVisible = isVisibleNumPad ? 'hidden' : '';
 
+    const boardValue = (row: number, col: number) => {
+        if (boardValues !== null && boardValues[row][col] !== 0) {
+            return boardValues[row][col]
+        } else {
+            return '';
+        }
+    }
+
+    const solutionBoardValueBackground = (boardValue: number) => {
+        if (boardValues !== null && (isVisibleSolution && userInputBoardValues[boardValue] === boardValues.flat()[boardValue])) {
+            return 'bg-slate-700';
+        } else {
+            return '';
+        }
+    }
+
     return (
-        <div className="flex flex-col gap-y-6 p-3 justify-center items-center ">
+        <div id="big" className="flex flex-col gap-y-6 p-3 justify-center items-center " draggable="false">
             <div className={`grid gap-3 ${gridCols}`}>
                 {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
-                    <div key={e2} className={`flex flex-col size-16 p-0 justify-center items-center border rounded ${isVisibleSolution && userInputBoardValues[Number(e2)] === boardValues.flat()[Number(e2)] ? 'bg-slate-700' : ''} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
+                    <div key={e2} className={`flex flex-col size-16 p-0 justify-center items-center border rounded ${solutionBoardValueBackground(e2)} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
                         <div className="flex justify-center items-center w-full h-full text-xl"><p>{userInputBoardValues[e2] !== 0 ? userInputBoardValues[e2] : ''}</p></div>
-                        <div className={`flex pr-1 pb-1 justify-end items-end w-full text-sm ${isVisibleSolution ? '' : 'hidden'}`}><p className="p-0">{boardValues[i1][i2] !== 0 ? boardValues[i1][i2] : ''}</p></div>
+                        <div className={`flex pr-1 pb-1 justify-end items-end w-full text-sm ${isVisibleSolution ? '' : 'hidden'}`}><p className="p-0">{boardValue(i1, i2)}</p></div>
                     </div>
                 ))
                 ))}
             </div>
 
-            <div className="min-h-2xl border">
+            <div
+                id={`numpad`}
+                className="min-h-2xl border"
+
+                onTouchMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const touches = e.touches[0];
+                    if (isVisibleNumPad) {
+                        // Numpad
+                        if ((touches.clientX < rect.left || touches.clientX > rect.right) || (touches.clientY < rect.top || touches.clientY > rect.bottom)) {
+                            console.log('out', rect.left, touches.clientX)
+                        } else {
+                            const relativeX = (touches.clientX - rect.left) / rect.width;
+                            const relativeY = (touches.clientY - rect.top) / rect.height;
+                            console.log('in', rect.left, touches.clientX, (touches.clientX - rect.left) / rect.width, (touches.clientY - rect.top) / rect.height)
+
+                            setNumPadCellIndex(getNumPadValueByRelativePosition(relativeX, relativeY));
+                        }
+                    } else {
+                        // Touchpad
+                        if ((touches.clientX < rect.left || touches.clientX > rect.right) || (touches.clientY < rect.top || touches.clientY > rect.bottom)) {
+                            console.log('onTouchMove pad out', rect.left, touches.clientX)
+                        } else {
+                            const relativeX = (touches.clientX - rect.left) / rect.width;
+                            const relativeY = (touches.clientY - rect.top) / rect.height;
+                            console.log('onTouchMove pad in', rect.left, touches.clientX, (touches.clientX - rect.left) / rect.width, (touches.clientY - rect.top) / rect.height, cellIndex)
+
+                            setCellIndex(getTouchPadValueByRelativePosition(relativeX, relativeY));
+
+                        }
+                    }
+
+                }}
+                onTouchEnd={(e) => {
+                    console.log('onTouchEnd pad', isVisibleNumPad);
+                    if (isVisibleNumPad) {
+                        console.log('onTouchEnd', 'setUserInputBoardValues');
+                        setIsVisibleNumPad(false);
+                        const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
+                        setUserInputBoardValues(newUserInputBoardValues);
+                        e.preventDefault();
+                    }
+                }}
+            >
                 <div className={`grid gap-0 ${gridCols} ${gridNaviVisible}`}>
                     {cellMatrixIndices.flat().map((e, i) => (
                         <div
+                            id={`numPadValue${i}`}
                             className={`flex size-12 border ${activeCellStyle(i)}`}
                             key={i}
                             onMouseEnter={() => {
                                 setCellIndex(i);
                                 console.log(i);
                             }}
-                            onMouseDown={(e) => {
-                                console.log(i, 'MouseDown');
-                                setIsVisibleNumPad(true);
-                                // setNumPadPosition({ x: e.clientX, y: e.clientY });
+                            onClick={(e) => {
+                                console.log(i, 'onClick', e.clientX, cellIndex);
+                                if (i === cellIndex) {
+                                    console.log('onClick')
+                                    setIsVisibleNumPad(true);
+                                    setNumPadPosition({ x: e.clientX, y: e.clientY });
+                                }
                             }}
+
                             onMouseUp={() => {
                                 console.log(i, 'MouseUp');
-                                // setIsVisibleNumPad(false);
                             }}
+
+                            onTouchStart={(e) => {
+                                console.log('onTouchStart key');
+                                if (cellIndex === i) {
+                                    console.log('Same key');
+                                    setIsVisibleNumPad(true);
+                                } else {
+                                    console.log('Different key');
+                                }
+                            }}
+
+                            onTouchEnd={(e) => {
+                                console.log('onTouchEnd key');
+                            }}
+
                         >{ }</div>
                     ))}
                 </div>
@@ -365,24 +474,19 @@ export default function Sudoku() {
                                 console.log(cellValue, 'MouseOver');
                                 setNumPadCellIndex(cellValue);
                             }}
-                            onTouchStart={() => {
-                                console.log(cellValue, 'MouseOver');
-                                setNumPadCellIndex(cellValue);
+
+                            onMouseDown={() => {
+                                if (isVisibleNumPad) {
+                                    console.log('setNumPadCellIndex: ', cellValue, 'onMouseDown', 'cellIndex: ', cellIndex, isVisibleNumPad);
+                                    const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
+                                    setUserInputBoardValues(newUserInputBoardValues);
+                                    console.log(newUserInputBoardValues);
+                                    setIsVisibleNumPad(false);
+                                }
+
                             }}
-                            onMouseUp={() => {
-                                console.log('setNumPadCellIndex: ', cellValue, 'onMouseUp', 'cellIndex: ', cellIndex);
-                                const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
-                                setUserInputBoardValues(newUserInputBoardValues);
-                                console.log(newUserInputBoardValues);
-                                setIsVisibleNumPad(false);
-                            }}
-                            onTouchEnd={() => {
-                                console.log('setNumPadCellIndex: ', cellValue, 'onMouseUp', 'cellIndex: ', cellIndex);
-                                const newUserInputBoardValues = [...userInputBoardValues.map((cellValue, i) => i === cellIndex ? numPadCellIndex : cellValue)];
-                                setUserInputBoardValues(newUserInputBoardValues);
-                                console.log(newUserInputBoardValues);
-                                setIsVisibleNumPad(false);
-                            }}
+
+
                         >
                             <p className="text-center">{cellValue}</p>
                         </div>
@@ -392,12 +496,13 @@ export default function Sudoku() {
             <div className="flex gap-x-24 justify-between pt-10">
                 <button className={buttonClassName}
                     onClick={() => console.log(generateSudoku())} >Generate sudoku</button>
-                <button className={buttonClassName}
+                {/* <button className={buttonClassName}
                     onClick={() => {
                         const reshapedNewArray = reshapeArray(userInputBoardValues, cellMatrixShape.m);
                         console.log(reshapedNewArray, checkUserInputValues(reshapedNewArray));
-                    }} >Check user solution</button>
-                <button className={buttonClassName}
+                    }} >Check user solution</button> */}
+                <button
+                    className={`${buttonClassName} ${boardValues !== null ? '' : 'hidden'}`}
                     onClick={() => setIsVisibleSolution(previousState => !previousState)} >{isVisibleSolution ? 'Hide computer solution' : 'Show computer solution'}</button>
             </div>
         </div >
