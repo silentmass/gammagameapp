@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-gray-500 overflow-hidden md:overflow-auto`}>
-        <main className="flex flex-col min-h-screen min-w-screen w-full items-center gap-y-5">
+        <main className="flex flex-col min-h-screen min-w-screen w-full items-center">
 
           <div className="relative">
             <div className="">

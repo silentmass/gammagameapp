@@ -364,11 +364,11 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div id="big" className="flex flex-col gap-y-1 p-3 justify-between items-center " draggable="false">
+        <div id="big" className="flex flex-col gap-y-1 justify-between items-center " draggable="false">
             <div className="flex relative ">
                 <div id='stimulus' className="">{children}</div>
                 <div id='sudoku' className="absolute w-full top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2">
-                    <div className="flex border-0 justify-center p-3">
+                    <div className="flex border-0 justify-center">
                         <div className={`grid ${gridCols} gap-3`}>
                             {cellMatrixIndices.map((e1, i1) => (e1.map((e2, i2) => (
                                 <div key={e2} className={`flex size-16 border rounded p-0 justify-center items-center  ${solutionBoardValueBackground(e2)} ${getCellBackgroundColor(e2, neighbourCellIndices)} ${activeCellStyle(e2)}`}>
@@ -385,7 +385,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
 
             <div
                 id={`numpad`}
-                className="border select-none"
+                className="select-none"
                 draggable="false"
                 onTouchMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -501,7 +501,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                     ))}
                 </div>
             </div>
-            <div className="flex gap-x-24 justify-between w-full h-full">
+            <div className="flex gap-x-24 pt-2">
                 <button className={buttonClassName}
                     onClick={() => console.log(generateSudoku())} >Generate</button>
                 {/* <button className={buttonClassName}
