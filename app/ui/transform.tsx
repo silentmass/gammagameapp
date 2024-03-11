@@ -3,6 +3,8 @@ import { useRef, useEffect } from 'react';
 export default function Transform() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+    const canvasSide = 375;
+
     useEffect(() => {
         const canvas = canvasRef.current;
 
@@ -68,5 +70,5 @@ export default function Transform() {
 
     }, []);
 
-    return (<canvas ref={canvasRef} width="375" height="375" />);
+    return (<canvas ref={canvasRef} width={canvasSide} height={canvasSide} />);
 }

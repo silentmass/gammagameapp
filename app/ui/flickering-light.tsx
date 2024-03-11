@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 export default function FlickeringLight() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const canvasSide = 350;
+    const canvasSide = 375;
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -13,8 +13,6 @@ export default function FlickeringLight() {
         let lightOn = true;
         const flickerFrequency = 40;
         const flickerInterval = 1 / (flickerFrequency / 60);
-
-
 
         if (canvas) {
             const centerX = canvas.width / 2;
@@ -48,5 +46,5 @@ export default function FlickeringLight() {
 
     }, []);
 
-    return (<canvas ref={canvasRef} width="400" height="400" />);
+    return (<canvas ref={canvasRef} width={canvasSide} height={canvasSide} />);
 }

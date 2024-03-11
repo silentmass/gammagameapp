@@ -4,7 +4,7 @@ import { pixelDistanceFromOrigin, opacityInitialPhase } from '@/app/ui/waves';
 export default function ConcentricCircles() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const canvasSide = 350;
+    const canvasSide = 375;
 
     const animatedCyclesPerRadius = 10;
     const animatedCyclesPerSecond = 0.5;

@@ -273,7 +273,7 @@ export default function Nback({ children, stimulusDuration, interStimulusInterva
                 }
             </div>
             <StimulusHistory history={shownTargetsList} />
-            <div className='max-w-2xl h-full w-full flex-col items-center p-0 border border-slate-500 rounded'>
+            <div className='max-w-2xl h-full w-full flex-col items-center p-0 rounded'>
                 <div className={`flex border-0 items-center justify-center rounded ${getActionFeedbackLabelBackground(isTargetVisible, isActionCorrect)}`}>
                     <p className={`text-xs border-0`}>
                         <ActionLabel isTargetSelected={isTargetSelected} />

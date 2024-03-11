@@ -17,13 +17,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-500`}>
-        <main className="flex flex-col min-h-screen min-w-screen w-full items-center justify-center gap-y-5">
-          <div className="flex flex-min-h-screen flex-col max-w-2xl items-center justify-center">
-            {children}
-          </div>
-          <div className="flex max-w-xl items-center justify-center flex-wrap gap-3 p-3">
-            <NavLinks />
+      <body className={`${inter.className} bg-gray-500 overflow-hidden md:overflow-auto`}>
+        <main className="flex flex-col min-h-screen min-w-screen w-full items-center gap-y-5">
+
+          <div className="relative">
+            <div className="">
+              <div className="flex flex-min-h-screen flex-col max-w-2xl items-center justify-center">
+                {children}
+              </div>
+            </div>
+            <div className="absolute top-0 left-0 transform">
+              <div className="flex flex-col h-screen width-1/2 item-end p-1 gap-1">
+                <NavLinks />
+              </div>
+            </div>
+
           </div>
         </main >
       </body>

@@ -11,7 +11,7 @@ export const opacityInitialPhase = (currentTime: number, animatedCyclesPerSecond
 export default function Waves() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const canvasSide = 350;
+    const canvasSide = 375;
     const numberOfCircles = 10;
     const radiusIncrement = (canvasSide / 2) / numberOfCircles;
     let radius = 0;
@@ -43,7 +43,7 @@ export default function Waves() {
                 offscreenCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
                 // Concentric circles
-                for (let i = 0; i < numberOfCircles; i++) {
+                for (let i = 0; i < numberOfCircles - 1; i++) {
                     offscreenCtx.beginPath();
                     currentRadius = radiusIncrement * (i + 1) + radius;
                     if (currentRadius < 0) {
@@ -64,8 +64,6 @@ export default function Waves() {
                     mainCtx.arc(centerX, centerY, (canvasSide / 2), 0, Math.PI * 2);
                     mainCtx.clip()
                 }
-
-
 
                 const step = () => {
                     if (mainCtx) {
