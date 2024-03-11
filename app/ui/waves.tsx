@@ -13,7 +13,7 @@ export default function Waves() {
 
     const canvasSide = 350;
     const numberOfCircles = 10;
-    const radiusIncrement = canvasSide / 2 / numberOfCircles;
+    const radiusIncrement = (canvasSide / 2) / numberOfCircles;
     let radius = 0;
     const maxRadius = radiusIncrement * numberOfCircles;
     let animationFrameId: number;
@@ -61,7 +61,7 @@ export default function Waves() {
                 if (mainCtx) {
                     // Draw mask
                     mainCtx.beginPath();
-                    mainCtx.arc(centerX, centerY, canvasSide / 2, 0, Math.PI * 2);
+                    mainCtx.arc(centerX, centerY, (canvasSide / 2), 0, Math.PI * 2);
                     mainCtx.clip()
                 }
 
