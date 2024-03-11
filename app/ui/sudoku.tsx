@@ -476,7 +476,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                 >
                     {[1, 2, 3, 4, 0].map((cellValue, i) => (
                         <div
-                            className={`flex min-w-24 min-h-24 justify-center items-center text-xl select-none ${Number(cellValue) === 0 ? 'col-span-2' : ''} ${activeNumPadCellStyle(cellValue)}`}
+                            className={`flex min-w-16 min-h-16 justify-center items-center text-xl select-none ${Number(cellValue) === 0 ? 'col-span-2' : ''} ${activeNumPadCellStyle(cellValue)}`}
                             key={i}
                             onMouseOver={() => {
                                 console.log(cellValue, 'MouseOver');
@@ -499,7 +499,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                     ))}
                 </div>
             </div>
-            <div className="flex gap-x-24 justify-between pt-10">
+            <div className="flex gap-x-24 justify-between">
                 <button className={buttonClassName}
                     onClick={() => console.log(generateSudoku())} >Generate sudoku</button>
                 {/* <button className={buttonClassName}
