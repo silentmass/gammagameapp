@@ -364,7 +364,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div id="big" className="flex flex-col gap-y-6 p-3 justify-center items-center " draggable="false">
+        <div id="big" className="flex flex-col gap-y-1 p-3 justify-between items-center " draggable="false">
             <div className="flex relative ">
                 <div id='stimulus' className="">{children}</div>
                 <div id='sudoku' className="absolute w-full top-1/2 left-1/2 tranform -translate-x-1/2 -translate-y-1/2">
@@ -385,7 +385,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
 
             <div
                 id={`numpad`}
-                className="border-0 select-none"
+                className="border select-none"
                 draggable="false"
                 onTouchMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -432,7 +432,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                     {cellMatrixIndices.flat().map((e, i) => (
                         <div
                             id={`numPadValue${i}`}
-                            className={`flex size-12 border ${activeCellStyle(i)}`}
+                            className={`flex size-10 border ${activeCellStyle(i)}`}
                             key={i}
                             onMouseEnter={() => {
                                 setCellIndex(i);
@@ -478,7 +478,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                 >
                     {[1, 2, 3, 4, 0].map((cellValue, i) => (
                         <div
-                            className={`flex min-w-16 min-h-16 justify-center items-center text-xl select-none ${Number(cellValue) === 0 ? 'col-span-2' : ''} ${activeNumPadCellStyle(cellValue)}`}
+                            className={`flex min-w-12 min-h-12 justify-center items-center text-xl select-none ${Number(cellValue) === 0 ? 'col-span-2' : ''} ${activeNumPadCellStyle(cellValue)}`}
                             key={i}
                             onMouseOver={() => {
                                 console.log(cellValue, 'MouseOver');
@@ -501,9 +501,9 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                     ))}
                 </div>
             </div>
-            <div className="flex gap-x-24 justify-between">
+            <div className="flex gap-x-24 justify-between w-full h-full">
                 <button className={buttonClassName}
-                    onClick={() => console.log(generateSudoku())} >Generate sudoku</button>
+                    onClick={() => console.log(generateSudoku())} >Generate</button>
                 {/* <button className={buttonClassName}
                     onClick={() => {
                         const reshapedNewArray = reshapeArray(userInputBoardValues, cellMatrixShape.m);
@@ -511,7 +511,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
                     }} >Check user solution</button> */}
                 <button
                     className={`${buttonClassName} ${boardValues !== null ? '' : 'hidden'}`}
-                    onClick={() => setIsVisibleSolution(previousState => !previousState)} >{isVisibleSolution ? 'Hide computer solution' : 'Show computer solution'}</button>
+                    onClick={() => setIsVisibleSolution(previousState => !previousState)} >{isVisibleSolution ? 'Hide solution' : 'Show solution'}</button>
             </div>
         </div >
     );
