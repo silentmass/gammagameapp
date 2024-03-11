@@ -385,7 +385,7 @@ export default function Sudoku({ children }: { children: React.ReactNode }) {
 
             <div
                 id={`numpad`}
-                className="border-0"
+                className="border-0 select-none"
 
                 onTouchMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
