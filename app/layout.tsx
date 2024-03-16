@@ -22,12 +22,12 @@ export default function RootLayout({
 
           <div className="relative">
             <div className="">
-              <div className="flex flex-min-h-screen flex-col max-w-2xl items-center justify-center">
+              <div className="flex flex-min-h-screen flex-col items-center justify-center">
                 {children}
               </div>
             </div>
             <div className="absolute top-0 left-0 transform">
-              <div className="flex flex-col h-screen width-1/2 item-end p-1 gap-1">
+              <div className="flex flex-col h-screen item-end p-1 gap-1">
                 <NavLinks />
               </div>
             </div>
