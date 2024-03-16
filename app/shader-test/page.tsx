@@ -17,10 +17,10 @@ void main() {
   // Calculate distance from origin in xz-plane
   float distanceFromOriginXZ = sqrt(modelPosition.x * modelPosition.x + modelPosition.z * modelPosition.z);
 
-  modelPosition.y += sin(distanceFromOriginXZ * 10.0 + uTime * 2.0) * 0.05;
+  modelPosition.y += sin(distanceFromOriginXZ * 10.0 + uTime * 2.0) * 0.02;
   
   // Uncomment the code and hit the refresh button below for a more complex effect 🪄
-  modelPosition.y += sin(distanceFromOriginXZ * 10.0 + uTime * 2.0) * 0.05;
+  modelPosition.y += sin(distanceFromOriginXZ * 10.0 + uTime * 2.0) * 0.02;
 
   vec4 viewPosition = viewMatrix * modelPosition;
   vec4 projectedPosition = projectionMatrix * viewPosition;
@@ -38,10 +38,10 @@ uniform float uTime; // Uniform to pass time
 varying float vDistanceFromOriginXZ; // Receive the distance from the vertex shader
 varying vec2 vUv;
 
-vec3 colorA = vec3(0.008,0.895,0.940);
-vec3 colorB = vec3(0.129,0.299,1.000);
-// vec3 colorA = vec3(1.000,1.000,1.000);
-// vec3 colorB = vec3(0.000,0.000,0.000);
+// vec3 colorA = vec3(0.008,0.895,0.940);
+// vec3 colorB = vec3(0.129,0.299,1.000);
+vec3 colorA = vec3(1.000,1.000,1.000);
+vec3 colorB = vec3(0.000,0.000,0.000);
 
 void main() {
   
@@ -76,9 +76,12 @@ const CustomGeometryParticles = ({ count, shape }: { count: number, shape: strin
 
         if (shape === "plane") {
             for (let i = 0; i < count; i++) {
-                let x = (Math.random() - 0.5) * 2;
+                let angle = Math.random() * 2 * Math.PI;
+                let distanceFromOrigin = Math.random() * 1;
+
+                let x = Math.cos(angle) * distanceFromOrigin;
                 let y = (Math.random() - 0.5) * 0;
-                let z = (Math.random() - 0.5) * 2;
+                let z = Math.sin(angle) * distanceFromOrigin;
 
                 positions.set([x, y, z], i * 3);
             }
@@ -142,11 +145,11 @@ const CustomGeometryParticles = ({ count, shape }: { count: number, shape: strin
 export default function Page() {
     return (
         <div className='flex w-screen h-screen items-center justify-center'>
-            <Canvas camera={{ position: [1.5, 1.5, 1.5] }}>
-                <ambientLight intensity={0.5} />
+            <Canvas camera={{ position: [1., 2, 1.] }}>
+                {/* <ambientLight intensity={0.2} /> */}
                 {/* Try to change the shape prop to "box" and hit reload! */}
-                <CustomGeometryParticles count={4000} shape="plane" />
-                <OrbitControls autoRotate />
+                <CustomGeometryParticles count={6000} shape="plane" />
+                <OrbitControls autoRotate={false} />
             </Canvas>
         </div>
     );

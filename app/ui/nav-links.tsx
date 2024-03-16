@@ -18,6 +18,7 @@ const links = [
     { name: 'Transform', href: '/stimulation/transform' },
     { name: 'Waves', href: '/stimulation/waves' },
     { name: 'Sudoku', href: '/sudoku' },
+    { name: 'Shader-test', href: '/shader-test' },
 ];
 
 export default function NavLinks() {
@@ -37,8 +38,8 @@ export default function NavLinks() {
                     setIsVisibleMenu(previousValue => !previousValue);
                     console.log('Click', isVisibleMenu);
                 }}
-                className='flex flex-col size-10 rounded border border-slate-500 bg-slate-500/0 hover:bg-slate-700 active:bg-slate-900 gap-1 justify-center items-center'>
-                {[...Array(3)].map((e, i) => (<div key={i} className='w-2/3 h-1 rounded border-0 bg-slate-500'>{ }</div>))}
+                className='flex flex-col size-10 rounded border border-slate-400 bg-slate-500/0 hover:bg-slate-700 active:bg-slate-900 gap-1 justify-center items-center'>
+                {[...Array(3)].map((e, i) => (<div key={i} className='w-2/3 h-1 rounded border-0 bg-slate-400'>{ }</div>))}
             </button>
             <div className={`${showHideMenu()} flex flex-col gap-3 bg-slate-900/80 p-2 rounded`}>
                 {links.map((link) => {
